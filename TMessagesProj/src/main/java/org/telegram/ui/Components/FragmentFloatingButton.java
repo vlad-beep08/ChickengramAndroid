@@ -70,7 +70,7 @@ public class FragmentFloatingButton extends FrameLayout implements FactorAnimato
 
         ScaleStateListAnimator.apply(this);
         if (!isSubButton) {
-            setOutlineProvider(ViewOutlineProviderImpl.BOUNDS_OVAL);
+            setOutlineProvider(com.chickengram.ChickengramConfig.squareFab() ? ViewOutlineProviderImpl.BOUNDS_ROUND_RECT : ViewOutlineProviderImpl.BOUNDS_OVAL);
             setTranslationZ(dpf2(0.5f));
         }
 
@@ -163,10 +163,17 @@ public class FragmentFloatingButton extends FrameLayout implements FactorAnimato
         } else {
             imageView.setColorFilter(Theme.getColor(Theme.key_chats_actionIcon, resourcesProvider), PorterDuff.Mode.SRC_IN);
             progressView.setProgressColor(Theme.getColor(Theme.key_chats_actionIcon, resourcesProvider));
-            setBackground(Theme.createSimpleSelectorCircleDrawable(dp(48),
-                Theme.getColor(Theme.key_featuredStickers_addButton, resourcesProvider),
-                Theme.getColor(Theme.key_featuredStickers_addButtonPressed, resourcesProvider)
-            ));
+            if (com.chickengram.ChickengramConfig.squareFab()) {
+                setBackground(Theme.createSimpleSelectorRoundRectDrawable(dp(14),
+                    Theme.getColor(Theme.key_featuredStickers_addButton, resourcesProvider),
+                    Theme.getColor(Theme.key_featuredStickers_addButtonPressed, resourcesProvider)
+                ));
+            } else {
+                setBackground(Theme.createSimpleSelectorCircleDrawable(dp(48),
+                    Theme.getColor(Theme.key_featuredStickers_addButton, resourcesProvider),
+                    Theme.getColor(Theme.key_featuredStickers_addButtonPressed, resourcesProvider)
+                ));
+            }
         }
     }
 

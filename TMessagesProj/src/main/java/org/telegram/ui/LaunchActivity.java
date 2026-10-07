@@ -7304,6 +7304,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
+        chickengramResources = null;
         AndroidUtilities.checkDisplaySize(this, newConfig);
         AndroidUtilities.setPreferredMaxRefreshRate(getWindow());
         super.onConfigurationChanged(newConfig);
@@ -8608,6 +8609,19 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
         return false;
     }
 
+    private com.chickengram.icons.ChickengramResources chickengramResources;
+
+    @Override
+    public android.content.res.Resources getResources() {
+        if (ApplicationLoader.applicationContext == null || !com.chickengram.ChickengramConfig.solarIcons()) {
+            return super.getResources();
+        }
+        if (chickengramResources == null) {
+            chickengramResources = new com.chickengram.icons.ChickengramResources(super.getResources());
+        }
+        return chickengramResources;
+    }
+
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         int keyCode = event.getKeyCode();
@@ -8630,7 +8644,7 @@ public class LaunchActivity extends BasePermissionsActivity implements INavigati
                         showVoiceChatTooltip(mute ? UndoView.ACTION_VOIP_SOUND_MUTED : UndoView.ACTION_VOIP_SOUND_UNMUTED);
                     }
                 }
-            } else if (!mainFragmentsStack.isEmpty() && (!PhotoViewer.hasInstance() || !PhotoViewer.getInstance().isVisible()) && event.getRepeatCount() == 0) {
+            } else if (com.chickengram.ChickengramConfig.volumeUnmute() && !mainFragmentsStack.isEmpty() && (!PhotoViewer.hasInstance() || !PhotoViewer.getInstance().isVisible()) && event.getRepeatCount() == 0) {
                 BaseFragment fragment = mainFragmentsStack.get(mainFragmentsStack.size() - 1);
                 if (fragment instanceof ChatActivity && !BaseFragment.hasSheets(fragment)) {
                     if (((ChatActivity) fragment).maybePlayVisibleVideo()) {

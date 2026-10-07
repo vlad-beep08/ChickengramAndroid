@@ -7888,7 +7888,7 @@ public class Theme {
         if (dividerPaint == null) {
             return;
         }
-        dividerPaint.setColor(getColor(key_divider));
+        dividerPaint.setColor(com.chickengram.ChickengramConfig.disableDividers() ? 0 : getColor(key_divider));
         linkSelectionPaint.setColor(getColor(key_windowBackgroundWhiteLinkSelection));
 
         for (int a = 0; a < avatarDrawables.length; a++) {

@@ -6526,6 +6526,9 @@ public class ChatActivityEnterView extends FrameLayout implements
                     ignorePrevTextChange = false;
                     return;
                 }
+                if (innerTextChange == 0 && com.chickengram.ChickengramConfig.calcResults()) {
+                    com.chickengram.text.Calculator.apply(editable);
+                }
                 if (innerTextChange == 0) {
                     if (nextChangeIsSend) {
                         sendMessage();

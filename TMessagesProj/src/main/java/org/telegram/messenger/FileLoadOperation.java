@@ -289,7 +289,11 @@ public class FileLoadOperation {
     }
 
     private void updateParams() {
-        if ((preloadPrefixSize > 0 || MessagesController.getInstance(currentAccount).getfileExperimentalParams || NekoConfig.enhancedFileLoader.Bool()) && !forceSmallChunk) {
+        if (com.chickengram.ChickengramConfig.downloadBoost() == 2 && !forceSmallChunk) {
+            downloadChunkSizeBig = 1024 * 1024;
+            maxDownloadRequests = 12;
+            maxDownloadRequestsBig = 12;
+        } else if ((preloadPrefixSize > 0 || MessagesController.getInstance(currentAccount).getfileExperimentalParams || NekoConfig.enhancedFileLoader.Bool() || com.chickengram.ChickengramConfig.downloadBoost() == 1) && !forceSmallChunk) {
             downloadChunkSizeBig = 1024 * 512;
             maxDownloadRequests = 8;
             maxDownloadRequestsBig = 8;

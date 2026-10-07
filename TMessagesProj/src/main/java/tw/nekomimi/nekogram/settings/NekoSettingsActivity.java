@@ -97,7 +97,7 @@ public class NekoSettingsActivity extends BaseNekoSettingsActivity {
     @Override
     protected void onItemClick(View view, int position, float x, float y) {
         if (position == chickengramRow) {
-            presentFragment(new com.chickengram.ui.ChickengramSettingsActivity());
+            presentFragment(new com.chickengram.ui.settings.ChickengramPreferencesActivity());
         } else if (position == generalRow) {
             presentFragment(new NekoGeneralSettingsActivity());
         } else if (position == accountRow) {

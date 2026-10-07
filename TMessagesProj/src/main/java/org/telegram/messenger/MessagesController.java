@@ -19780,6 +19780,7 @@ public class MessagesController extends BaseController implements NotificationCe
                         message.out = true;
                     }
                 }
+                com.chickengram.messages.EditHistory.remember(currentAccount, message, getMessagesStorage());
                 if (!message.out) {
                     long from_id = DialogObject.getPeerDialogId(message.from_id);
                     if (from_id == clientUserId) {

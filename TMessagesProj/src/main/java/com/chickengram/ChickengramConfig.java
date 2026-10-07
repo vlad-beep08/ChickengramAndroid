@@ -7,27 +7,291 @@ import org.telegram.messenger.ApplicationLoader;
 
 public final class ChickengramConfig {
 
+    public static final int MAX_AVATAR_CORNERS = 28;
+
+    public static final int STICKER_SHAPE_DEFAULT = 0;
+    public static final int STICKER_SHAPE_ROUNDED = 1;
+    public static final int STICKER_SHAPE_MESSAGE = 2;
+
+    public static final int DELETED_MARK_ICON = 0;
+    public static final int DELETED_MARK_TEXT = 1;
+
+    public static final int[] DELETED_MARK_COLORS = {
+        0xFF8E8E93, 0xFFFF3B30, 0xFFE53935, 0xFFE91E63, 0xFFD81BDE, 0xFF9C27B0, 0xFF673AB7, 0xFF3D5AFE
+    };
+
     private static final String PREFERENCES = "chickengram";
-    private static final String KEEP_DELETED = "keepDeletedMessages";
-    private static final String QUICK_PHRASE = "quickPhraseButton";
+
+    private static volatile boolean loaded;
+    private static boolean keepDeletedMessages;
+    private static boolean saveEditHistory;
+    private static boolean quickPhraseButton;
+    private static int avatarCorners;
+    private static boolean solarIcons;
+    private static boolean squareFab;
+    private static boolean disableDividers;
+    private static int stickerShape;
+    private static boolean hideShareButton;
+    private static boolean removeMessageTail;
+    private static int doubleTapSeek;
+    private static boolean staticZoom;
+    private static boolean alwaysHd;
+    private static boolean calcResults;
+    private static boolean relativeOnline;
+    private static int downloadBoost;
+    private static boolean uploadBoost;
+    private static boolean volumeUnmute;
+    private static boolean semiTransparentDeleted;
+    private static int deletedMarkStyle;
+    private static int deletedMarkColor;
 
     private ChickengramConfig() {
     }
 
+    private static void ensureLoaded() {
+        if (loaded) {
+            return;
+        }
+        synchronized (ChickengramConfig.class) {
+            if (loaded) {
+                return;
+            }
+            final SharedPreferences p = preferences();
+            keepDeletedMessages = p.getBoolean("keepDeletedMessages", true);
+            saveEditHistory = p.getBoolean("saveEditHistory", true);
+            quickPhraseButton = p.getBoolean("quickPhraseButton", true);
+            avatarCorners = p.getInt("avatarCorners", MAX_AVATAR_CORNERS);
+            solarIcons = p.getBoolean("solarIcons", false);
+            squareFab = p.getBoolean("squareFab", false);
+            disableDividers = p.getBoolean("disableDividers", false);
+            stickerShape = p.getInt("stickerShape", STICKER_SHAPE_DEFAULT);
+            hideShareButton = p.getBoolean("hideShareButton", false);
+            removeMessageTail = p.getBoolean("removeMessageTail", false);
+            doubleTapSeek = p.getInt("doubleTapSeek", 10);
+            staticZoom = p.getBoolean("staticZoom", false);
+            alwaysHd = p.getBoolean("alwaysHd", false);
+            calcResults = p.getBoolean("calcResults", false);
+            relativeOnline = p.getBoolean("relativeOnline", false);
+            downloadBoost = p.getInt("downloadBoost", 0);
+            uploadBoost = p.getBoolean("uploadBoost", false);
+            volumeUnmute = p.getBoolean("volumeUnmute", true);
+            semiTransparentDeleted = p.getBoolean("semiTransparentDeleted", false);
+            deletedMarkStyle = p.getInt("deletedMarkStyle", DELETED_MARK_ICON);
+            deletedMarkColor = p.getInt("deletedMarkColor", 1);
+            loaded = true;
+        }
+    }
+
     public static boolean keepDeletedMessages() {
-        return preferences().getBoolean(KEEP_DELETED, true);
+        ensureLoaded();
+        return keepDeletedMessages;
     }
 
     public static void setKeepDeletedMessages(boolean value) {
-        preferences().edit().putBoolean(KEEP_DELETED, value).apply();
+        keepDeletedMessages = put("keepDeletedMessages", value);
+    }
+
+    public static boolean saveEditHistory() {
+        ensureLoaded();
+        return saveEditHistory;
+    }
+
+    public static void setSaveEditHistory(boolean value) {
+        saveEditHistory = put("saveEditHistory", value);
     }
 
     public static boolean quickPhraseButton() {
-        return preferences().getBoolean(QUICK_PHRASE, true);
+        ensureLoaded();
+        return quickPhraseButton;
     }
 
     public static void setQuickPhraseButton(boolean value) {
-        preferences().edit().putBoolean(QUICK_PHRASE, value).apply();
+        quickPhraseButton = put("quickPhraseButton", value);
+    }
+
+    public static int avatarCorners() {
+        ensureLoaded();
+        return avatarCorners;
+    }
+
+    public static void setAvatarCorners(int value) {
+        avatarCorners = put("avatarCorners", Math.max(0, Math.min(MAX_AVATAR_CORNERS, value)));
+    }
+
+    public static boolean solarIcons() {
+        ensureLoaded();
+        return solarIcons;
+    }
+
+    public static void setSolarIcons(boolean value) {
+        solarIcons = put("solarIcons", value);
+    }
+
+    public static boolean squareFab() {
+        ensureLoaded();
+        return squareFab;
+    }
+
+    public static void setSquareFab(boolean value) {
+        squareFab = put("squareFab", value);
+    }
+
+    public static boolean disableDividers() {
+        ensureLoaded();
+        return disableDividers;
+    }
+
+    public static void setDisableDividers(boolean value) {
+        disableDividers = put("disableDividers", value);
+    }
+
+    public static int stickerShape() {
+        ensureLoaded();
+        return stickerShape;
+    }
+
+    public static void setStickerShape(int value) {
+        stickerShape = put("stickerShape", value);
+    }
+
+    public static boolean hideShareButton() {
+        ensureLoaded();
+        return hideShareButton;
+    }
+
+    public static void setHideShareButton(boolean value) {
+        hideShareButton = put("hideShareButton", value);
+    }
+
+    public static boolean removeMessageTail() {
+        ensureLoaded();
+        return removeMessageTail;
+    }
+
+    public static void setRemoveMessageTail(boolean value) {
+        removeMessageTail = put("removeMessageTail", value);
+    }
+
+    public static int doubleTapSeek() {
+        ensureLoaded();
+        return doubleTapSeek;
+    }
+
+    public static void setDoubleTapSeek(int value) {
+        doubleTapSeek = put("doubleTapSeek", value);
+    }
+
+    public static boolean staticZoom() {
+        ensureLoaded();
+        return staticZoom;
+    }
+
+    public static void setStaticZoom(boolean value) {
+        staticZoom = put("staticZoom", value);
+    }
+
+    public static boolean alwaysHd() {
+        ensureLoaded();
+        return alwaysHd;
+    }
+
+    public static void setAlwaysHd(boolean value) {
+        alwaysHd = put("alwaysHd", value);
+    }
+
+    public static boolean calcResults() {
+        ensureLoaded();
+        return calcResults;
+    }
+
+    public static void setCalcResults(boolean value) {
+        calcResults = put("calcResults", value);
+    }
+
+    public static boolean relativeOnline() {
+        ensureLoaded();
+        return relativeOnline;
+    }
+
+    public static void setRelativeOnline(boolean value) {
+        relativeOnline = put("relativeOnline", value);
+    }
+
+    public static int downloadBoost() {
+        ensureLoaded();
+        return downloadBoost;
+    }
+
+    public static void setDownloadBoost(int value) {
+        downloadBoost = put("downloadBoost", value);
+    }
+
+    public static boolean uploadBoost() {
+        ensureLoaded();
+        return uploadBoost;
+    }
+
+    public static void setUploadBoost(boolean value) {
+        uploadBoost = put("uploadBoost", value);
+    }
+
+    public static boolean volumeUnmute() {
+        ensureLoaded();
+        return volumeUnmute;
+    }
+
+    public static void setVolumeUnmute(boolean value) {
+        volumeUnmute = put("volumeUnmute", value);
+    }
+
+    public static boolean semiTransparentDeleted() {
+        ensureLoaded();
+        return semiTransparentDeleted;
+    }
+
+    public static void setSemiTransparentDeleted(boolean value) {
+        semiTransparentDeleted = put("semiTransparentDeleted", value);
+    }
+
+    public static int deletedMarkStyle() {
+        ensureLoaded();
+        return deletedMarkStyle;
+    }
+
+    public static void setDeletedMarkStyle(int value) {
+        deletedMarkStyle = put("deletedMarkStyle", value);
+    }
+
+    public static int deletedMarkColorIndex() {
+        ensureLoaded();
+        return deletedMarkColor;
+    }
+
+    public static int deletedMarkColor() {
+        ensureLoaded();
+        return DELETED_MARK_COLORS[Math.max(0, Math.min(DELETED_MARK_COLORS.length - 1, deletedMarkColor))];
+    }
+
+    public static void setDeletedMarkColor(int index) {
+        deletedMarkColor = put("deletedMarkColor", index);
+    }
+
+    public static void reset() {
+        preferences().edit().clear().commit();
+        loaded = false;
+        ensureLoaded();
+    }
+
+    private static boolean put(String key, boolean value) {
+        ensureLoaded();
+        preferences().edit().putBoolean(key, value).apply();
+        return value;
+    }
+
+    private static int put(String key, int value) {
+        ensureLoaded();
+        preferences().edit().putInt(key, value).apply();
+        return value;
     }
 
     private static SharedPreferences preferences() {

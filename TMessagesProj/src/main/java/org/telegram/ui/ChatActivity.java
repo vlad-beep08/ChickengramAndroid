@@ -451,6 +451,7 @@ public class ChatActivity extends BaseFragment implements
 
     // chat click menu buttons
     public final static int nkbtn_detail = 2012;
+    public final static int nkbtn_edit_history = 2091;
     public final static int nkbtn_deldlcache = 2013;
     public final static int nkbtn_view_history = 2014;
     public final static int nkbtn_repeat = 2015;
@@ -46148,6 +46149,10 @@ public class ChatActivity extends BaseFragment implements
                 presentFragment(new MessageDetailsActivity(selectedObject));
                 break;
             }
+            case nkbtn_edit_history: {
+                com.chickengram.ui.EditHistoryAlert.show(this, selectedObject);
+                break;
+            }
             case nkbtn_view_history: {
                 // same as "search_from_user_id"
                 TLRPC.Peer peer = selectedObject.messageOwner.from_id;
@@ -48178,6 +48183,11 @@ public class ChatActivity extends BaseFragment implements
                 options.add(nkbtn_detail);
                 icons.add(R.drawable.msg_info);
             }
+            if (com.chickengram.messages.EditHistory.has(currentAccount, selectedObject)) {
+                items.add("История изменений");
+                options.add(nkbtn_edit_history);
+                icons.add(R.drawable.msg_edit);
+            }
         } else if (type == 20) {
             items.add(LocaleController.getString(R.string.Retry));
             options.add(OPTION_RETRY);
@@ -48633,6 +48643,11 @@ public class ChatActivity extends BaseFragment implements
                     options.add(nkbtn_detail);
                     icons.add(R.drawable.msg_info);
                 }
+                if (com.chickengram.messages.EditHistory.has(currentAccount, selectedObject)) {
+                    items.add("История изменений");
+                    options.add(nkbtn_edit_history);
+                    icons.add(R.drawable.msg_edit);
+                }
                 if (NekoConfig.showMessageHide.Bool()) {
                     items.add(LocaleController.getString(R.string.Hide));
                     options.add(nkbtn_hide);
@@ -48861,6 +48876,11 @@ public class ChatActivity extends BaseFragment implements
                     items.add(LocaleController.getString(R.string.MessageDetails));
                     options.add(nkbtn_detail);
                     icons.add(R.drawable.msg_info);
+                }
+                if (com.chickengram.messages.EditHistory.has(currentAccount, selectedObject)) {
+                    items.add("История изменений");
+                    options.add(nkbtn_edit_history);
+                    icons.add(R.drawable.msg_edit);
                 }
                 if (NekoConfig.showMessageHide.Bool()) {
                     items.add(LocaleController.getString(R.string.Hide));

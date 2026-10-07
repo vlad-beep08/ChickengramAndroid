@@ -732,7 +732,8 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
             }
         }
 
-        items.add(SettingCell.Factory.of(100, 0xFF1BA4ED, 0xFF1488E1, R.drawable.msg_settings, getString(R.string.N_Config)));
+        items.add(SettingCell.Factory.of(101, 0xFFFF9A3C, 0xFFE8650C, R.drawable.msg_settings, "Настройки Чикенграма"));
+        items.add(SettingCell.Factory.of(102, 0xFFA77BFF, 0xFF6B45E0, R.drawable.ghost, "Призрак и шпион"));
         items.add(UItem.asShadow(null));
 
         items.add(SettingCell.Factory.of(1, IconBackgroundColors.BLUE.top, IconBackgroundColors.BLUE.bottom, R.drawable.settings_account, getString(R.string.SettingsAccount), getString(R.string.SettingsAccountInfo)));
@@ -933,6 +934,14 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
             }
             case 100: {
                 presentFragment(new NekoSettingsActivity());
+                break;
+            }
+            case 101: {
+                presentFragment(new com.chickengram.ui.settings.ChickengramPreferencesActivity());
+                break;
+            }
+            case 102: {
+                presentFragment(new com.chickengram.ui.settings.SpyPreferencesActivity());
                 break;
             }
         }

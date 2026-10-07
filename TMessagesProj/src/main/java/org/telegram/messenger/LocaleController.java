@@ -2835,6 +2835,15 @@ public class LocaleController {
             }
 
             if (dateDay == day && year == dateYear) {
+                if (com.chickengram.ChickengramConfig.relativeOnline()) {
+                    final int minutes = (int) Math.max(0, (System.currentTimeMillis() - date) / 60000L);
+                    if (minutes < 1) {
+                        return "был(а) только что";
+                    } else if (minutes < 60) {
+                        return "был(а) " + minutes + " мин. назад";
+                    }
+                    return "был(а) " + (minutes / 60) + " ч. назад";
+                }
                 return LocaleController.formatString(R.string.LastSeenFormatted, LocaleController.formatString("TodayAtFormatted", R.string.TodayAtFormatted, getInstance().getFormatterDay().format(new Date(date))));
                 /*int diff = (int) (ConnectionsManager.getInstance().getCurrentTime() - date) / 60;
                 if (diff < 1) {

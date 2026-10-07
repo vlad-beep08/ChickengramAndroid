@@ -7,6 +7,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.Drawable;
 import android.graphics.RectF;
 import android.text.TextPaint;
 import android.text.TextUtils;
@@ -22,6 +25,7 @@ import org.telegram.messenger.FileLog;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesStorage;
 import org.telegram.messenger.NotificationCenter;
+import org.telegram.messenger.R;
 import org.telegram.tgnet.TLRPC;
 
 import java.io.File;
@@ -41,7 +45,6 @@ public final class DeletedMessages {
     private static final String DATABASE = "chickengram_deleted.db";
     private static final String TABLE = "deleted";
     private static final int VERSION = 1;
-    private static final int BADGE_COLOR = 0xCCD7261B;
 
     private static final Object lock = new Object();
     private static final HashMap<Integer, HashMap<Long, HashSet<Integer>>> cache = new HashMap<>();
@@ -49,6 +52,8 @@ public final class DeletedMessages {
     private static TextPaint badgeText;
     private static Paint badgePaint;
     private static final RectF badgeRect = new RectF();
+    private static Drawable icon;
+    private static int iconColor;
 
     private DeletedMessages() {
     }
@@ -257,8 +262,8 @@ public final class DeletedMessages {
             badgeText.setTypeface(AndroidUtilities.bold());
             badgeText.setTextSize(AndroidUtilities.dp(10));
             badgePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            badgePaint.setColor(BADGE_COLOR);
         }
+        badgePaint.setColor((ChickengramConfig.deletedMarkColor() & 0x00FFFFFF) | 0xCC000000);
         final float padding = AndroidUtilities.dp(5);
         final float height = AndroidUtilities.dp(16);
         final float left = x + AndroidUtilities.dp(4);
@@ -267,6 +272,37 @@ public final class DeletedMessages {
         canvas.drawRoundRect(badgeRect, height / 2f, height / 2f, badgePaint);
         final float baseline = badgeRect.centerY() - (badgeText.descent() + badgeText.ascent()) / 2f;
         canvas.drawText(LABEL, left + padding, baseline, badgeText);
+    }
+
+    public static Drawable icon(Context context) {
+        final int color = ChickengramConfig.deletedMarkColor();
+        if (icon == null) {
+            icon = context.getResources().getDrawable(R.drawable.msg_delete).mutate();
+            iconColor = 0;
+        }
+        if (iconColor != color) {
+            icon.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN));
+            iconColor = color;
+        }
+        return icon;
+    }
+
+    public static float iconWidth(float height) {
+        if (icon == null) {
+            return height;
+        }
+        return icon.getIntrinsicWidth() * height / icon.getIntrinsicHeight();
+    }
+
+    public static void clear() {
+        synchronized (lock) {
+            try {
+                helper().getWritableDatabase().delete(TABLE, null, null);
+            } catch (Exception e) {
+                FileLog.e(e);
+            }
+            cache.clear();
+        }
     }
 
     private static HashMap<Long, HashSet<Integer>> load(int account) {

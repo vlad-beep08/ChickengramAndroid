@@ -21342,10 +21342,11 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
             boolean forward = x >= width / 3 * 2;
             if (canDoubleTapSeekVideo(e)) {
                 long old = current;
+                final long seekStep = com.chickengram.ChickengramConfig.doubleTapSeek() * 1000L;
                 if (x >= width / 3 * 2) {
-                    current += 10000;
+                    current += seekStep;
                 } else if (x < width / 3) {
-                    current -= 10000;
+                    current -= seekStep;
                 }
                 if (old != current) {
                     boolean apply = true;
@@ -21360,7 +21361,7 @@ public class PhotoViewer implements NotificationCenter.NotificationCenterDelegat
                     if (apply) {
                         videoForwardDrawable.setOneShootAnimation(true);
                         videoForwardDrawable.setLeftSide(x < width / 3);
-                        videoForwardDrawable.addTime(10000);
+                        videoForwardDrawable.addTime(seekStep);
                         seekVideoOrWebTo(current);
                         containerView.invalidate();
                         videoPlayerSeekbar.setProgress(current / (float) total, true);

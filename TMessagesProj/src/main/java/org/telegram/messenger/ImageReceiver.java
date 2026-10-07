@@ -326,6 +326,8 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
     private boolean forceCrossfade;
     private boolean useRoundRadius = true;
     private final int[] roundRadius = new int[4];
+    private final int[] chickengramRequestedRadius = new int[4];
+    private boolean chickengramAvatar;
     private int[] emptyRoundRadius;
     private boolean isRoundRect = true;
     private Object mark;
@@ -429,6 +431,10 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
     public void setForUserOrChat(TLObject object, Drawable avatarDrawable, Object parentObject, boolean animationEnabled, int vectorType, boolean big) {
         if (parentObject == null) {
             parentObject = object;
+        }
+        if (!chickengramAvatar) {
+            chickengramAvatar = true;
+            setRoundRadius(chickengramRequestedRadius.clone());
         }
         setUseRoundForThumbDrawable(true);
         BitmapDrawable strippedBitmap = null;
@@ -2541,6 +2547,16 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
     }
 
     public void setRoundRadius(int[] value) {
+        System.arraycopy(value, 0, chickengramRequestedRadius, 0, Math.min(value.length, chickengramRequestedRadius.length));
+        if (chickengramAvatar) {
+            final int corners = com.chickengram.ChickengramConfig.avatarCorners();
+            if (corners < com.chickengram.ChickengramConfig.MAX_AVATAR_CORNERS) {
+                value = value.clone();
+                for (int i = 0; i < value.length; i++) {
+                    value[i] = Math.max(1, value[i] * corners / com.chickengram.ChickengramConfig.MAX_AVATAR_CORNERS);
+                }
+            }
+        }
         if (NaConfig.INSTANCE.getShowSquareAvatar().Bool()) {
             java.util.Arrays.fill(value, 0);
         }

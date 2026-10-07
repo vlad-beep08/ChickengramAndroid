@@ -3785,7 +3785,9 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             if (index1 == -1 || index2 == -1) {
                 isInPinchToZoomTouchMode = false;
 
-                finishZoom();
+                if (!com.chickengram.ChickengramConfig.staticZoom()) {
+                    finishZoom();
+                }
                 return false;
             }
             pinchScale = (float) Math.hypot(ev.getX(index2) - ev.getX(index1), ev.getY(index2) - ev.getY(index1)) / pinchStartDistance;
@@ -3800,7 +3802,9 @@ public class InstantCameraView extends FrameLayout implements NotificationCenter
             }
         } else if ((ev.getActionMasked() == MotionEvent.ACTION_UP || (ev.getActionMasked() == MotionEvent.ACTION_POINTER_UP && checkPointerIds(ev)) || ev.getActionMasked() == MotionEvent.ACTION_CANCEL) && isInPinchToZoomTouchMode) {
             isInPinchToZoomTouchMode = false;
-            finishZoom();
+            if (!com.chickengram.ChickengramConfig.staticZoom()) {
+                finishZoom();
+            }
         }
         return true;
     }

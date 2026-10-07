@@ -1747,6 +1747,8 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
     public int signWidth;
     private CharSequence currentTimeString;
     private boolean drawEditedIcon;
+    private boolean drawDeletedIcon;
+    private boolean chickengramDeleted;
     private boolean drawTime = true;
     private boolean forceNotDrawTime;
     private Paint drillHolePaint;
@@ -9834,7 +9836,20 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                     availableTimeWidth = photoWidth - dp(14);
                     backgroundWidth = photoWidth + dp(12);
 
-                    photoImage.setRoundRadius(0);
+                    final int chickengramStickerShape = com.chickengram.ChickengramConfig.stickerShape();
+                    if (chickengramStickerShape == com.chickengram.ChickengramConfig.STICKER_SHAPE_ROUNDED) {
+                        photoImage.setRoundRadius(dp(10));
+                    } else if (chickengramStickerShape == com.chickengram.ChickengramConfig.STICKER_SHAPE_MESSAGE) {
+                        final int big = dp(Math.max(6, org.telegram.messenger.SharedConfig.bubbleRadius));
+                        final int small = dp(Math.min(6, org.telegram.messenger.SharedConfig.bubbleRadius));
+                        if (messageObject.isOutOwner()) {
+                            photoImage.setRoundRadius(big, big, small, big);
+                        } else {
+                            photoImage.setRoundRadius(big, big, big, small);
+                        }
+                    } else {
+                        photoImage.setRoundRadius(0);
+                    }
                     canChangeRadius = false;
                     if (!messageObject.isOutOwner() && MessageObject.isPremiumSticker(messageObject.getDocument())) {
                         flipImage = true;
@@ -18636,12 +18651,15 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         if (messageObject.messageOwner != null && messageObject.messageOwner.translated) {
             timeString = timeString + " | " + LocaleController.getString(R.string.Translate);
         }
-        if (com.chickengram.messages.DeletedMessages.isDeleted(currentAccount, messageObject)) {
+        chickengramDeleted = com.chickengram.messages.DeletedMessages.isDeleted(currentAccount, messageObject);
+        drawDeletedIcon = chickengramDeleted && com.chickengram.ChickengramConfig.deletedMarkStyle() == com.chickengram.ChickengramConfig.DELETED_MARK_ICON;
+        if (chickengramDeleted && !drawDeletedIcon) {
             timeString = com.chickengram.messages.DeletedMessages.LABEL + " " + timeString;
         }
         if (messageObject.isAnyKindOfSticker() && NaConfig.INSTANCE.getRealHideTimeForSticker().Bool()) {
             timeString = "";
             drawEditedIcon = false;
+            drawDeletedIcon = false;
         }
         if (signString != null) {
             if (messageObject.messageOwner.via_business_bot_id != 0) {
@@ -18723,6 +18741,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         if (drawEditedIcon && Theme.chat_editDrawable != null) {
             float drawableWidth = Theme.chat_editDrawable.getIntrinsicWidth() * Theme.chat_timePaint.getTextSize() / Theme.chat_editDrawable.getIntrinsicHeight();
             timeWidth += drawableWidth + dp(3);
+        }
+        if (drawDeletedIcon) {
+            timeWidth += com.chickengram.messages.DeletedMessages.iconWidth(Theme.chat_timePaint.getTextSize()) + dp(3);
         }
         if (messageObject.scheduled) {
             if (messageObject.isSendError()) {
@@ -18826,6 +18847,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
 
     protected boolean checkNeedDrawShareButton(MessageObject messageObject) {
         if (isReportChat) return false;
+        if (com.chickengram.ChickengramConfig.hideShareButton()) return false;
         if (currentMessageObject.deleted && !currentMessageObject.deletedByThanos) return false;
         if (currentMessageObject.isSponsored()) return false;
         if (currentMessageObject.isEphemeral()) return false;
@@ -20391,7 +20413,8 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             }
         }
 
-        if (alphaInternal != 1.0f) {
+        final float chickengramLayerAlpha = alphaInternal * chickengramDeletedAlpha();
+        if (chickengramLayerAlpha != 1.0f) {
             int top = 0;
             int left = 0;
             int bottom = getMeasuredHeight();
@@ -20418,7 +20441,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                 bottom = (int) (parentHeight - getY());
             }
             rect.set(left, top, right, bottom);
-            canvas.saveLayerAlpha(rect, (int) (255 * alphaInternal), Canvas.ALL_SAVE_FLAG);
+            canvas.saveLayerAlpha(rect, (int) (255 * chickengramLayerAlpha), Canvas.ALL_SAVE_FLAG);
         }
         boolean clipContent = false;
         if (transitionParams.animateBackgroundBoundsInner && currentBackgroundDrawable != null && !isRoundVideo && (currentMessageObject == null || !currentMessageObject.sendPreview)) {
@@ -20931,7 +20954,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         }
 
         if ((drawBackground || transitionParams.animateDrawBackground) && currentBackgroundDrawable != null && (currentPosition == null || isDrawSelectionBackground() && (currentMessageObject.isMusic() || currentMessageObject.isDocument())) && !(enterTransitionInProgress && !currentMessageObject.isVoice())) {
-            float alphaInternal = this.alphaInternal;
+            float alphaInternal = this.alphaInternal * chickengramDeletedAlpha();
             if (fromParent) {
                 alphaInternal *= getAlpha();
             }
@@ -24302,7 +24325,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                 reactionsLayoutInBubble.draw(canvas, transitionParams.animateChangeProgress, null);
             }
 
-            if (ChatObject.isChannel(currentChat) && !currentChat.megagroup || (currentMessageObject.messageOwner.flags & TLRPC.MESSAGE_FLAG_HAS_VIEWS) != 0 || repliesLayout != null || isPinned || drawEditedIcon) {
+            if (ChatObject.isChannel(currentChat) && !currentChat.megagroup || (currentMessageObject.messageOwner.flags & TLRPC.MESSAGE_FLAG_HAS_VIEWS) != 0 || repliesLayout != null || isPinned || drawEditedIcon || drawDeletedIcon) {
                 additionalX += this.timeWidth - timeLayout.getLineWidth(0);
                 if (reactionsLayoutInBubble.isSmall && !reactionsLayoutInBubble.isEmpty) {
                     additionalX -= reactionsLayoutInBubble.width;
@@ -24373,7 +24396,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                 reactionsLayoutInBubble.setScrimProgress(0, false);
                 reactionsLayoutInBubble.draw(canvas, transitionParams.animateChangeProgress, null);
             }
-            if (ChatObject.isChannel(currentChat) && !currentChat.megagroup || (currentMessageObject.messageOwner.flags & TLRPC.MESSAGE_FLAG_HAS_VIEWS) != 0 || (repliesLayout != null || transitionParams.animateReplies) || (isPinned || transitionParams.animatePinned) || drawEditedIcon) {
+            if (ChatObject.isChannel(currentChat) && !currentChat.megagroup || (currentMessageObject.messageOwner.flags & TLRPC.MESSAGE_FLAG_HAS_VIEWS) != 0 || (repliesLayout != null || transitionParams.animateReplies) || (isPinned || transitionParams.animatePinned) || drawEditedIcon || drawDeletedIcon) {
                 additionalX += timeWidth - timeLayout.getLineWidth(0);
                 if (reactionsLayoutInBubble.isSmall && !reactionsLayoutInBubble.isEmpty) {
                     additionalX -= reactionsLayoutInBubble.width;
@@ -24975,7 +24998,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             if (useScale) {
                 canvas.restore();
             }
-            if (drawEditedIcon && isPinned) {
+            if ((drawEditedIcon || drawDeletedIcon) && isPinned) {
                 offsetX += w + dp(3);
             }
             transitionParams.lastTimeXPinned = pinnedX;
@@ -24996,6 +25019,24 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             editedDrawable.draw(canvas);
             editedDrawable.setAlpha(255);
             editedDrawable.setColorFilter(null);
+        }
+        if (drawDeletedIcon) {
+            float deletedX = (transitionParams.shouldAnimateTimeX ? this.timeX : timeX) + offsetX;
+            if (drawEditedIcon && Theme.chat_editDrawable != null) {
+                deletedX += Theme.chat_editDrawable.getIntrinsicWidth() * Theme.chat_timePaint.getTextSize() / Theme.chat_editDrawable.getIntrinsicHeight() + dp(3);
+            }
+            if (currentMessagesGroup != null && currentMessagesGroup.transitionParams.backgroundChangeBounds) {
+                deletedX += currentMessagesGroup.transitionParams.offsetRight;
+            }
+            if (transitionParams.animateBackgroundBoundsInner) {
+                deletedX += animationOffsetX;
+            }
+            Drawable deletedDrawable = com.chickengram.messages.DeletedMessages.icon(getContext());
+            float iconHeight = Theme.chat_timePaint.getTextSize();
+            setDrawableBounds(deletedDrawable, deletedX, timeY, iconHeight);
+            deletedDrawable.setAlpha((int) (255 * alpha));
+            deletedDrawable.draw(canvas);
+            deletedDrawable.setAlpha(255);
         }
     }
 
@@ -28286,6 +28327,10 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             buttonY = (int) (photoImage.getImageY() + (photoImage.getImageHeight() - dp(48)) / 2);
             radialProgress.setProgressRect(buttonX, buttonY, buttonX + dp(48), buttonY + dp(48));
         }
+    }
+
+    private float chickengramDeletedAlpha() {
+        return chickengramDeleted && com.chickengram.ChickengramConfig.semiTransparentDeleted() ? 0.55f : 1f;
     }
 
     @Override
