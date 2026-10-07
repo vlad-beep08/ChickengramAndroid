@@ -216,6 +216,12 @@ public class ChatsPreferencesActivity extends BasePreferencesFragment {
         items.add(UItem.asShadow("Итоги до голосования показывают результаты опроса до того, как вы проголосуете. В «Меню сообщения» можно выбрать пункты, которые появляются по нажатию на сообщение."));
 
         items.add(UItem.asHeader("Камера"));
+        final boolean camera2 = org.telegram.messenger.SharedConfig.isUsingCamera2(currentAccount);
+        items.add(button(0, "Тип камеры в кружках", camera2 ? "Camera 2" : "Camera 1", v -> choose("Тип камеры в кружках", new String[] { "Camera 1", "Camera 2" }, camera2 ? 1 : 0, index -> {
+            if ((index == 1) != org.telegram.messenger.SharedConfig.isUsingCamera2(currentAccount)) {
+                org.telegram.messenger.SharedConfig.toggleUseCamera2(currentAccount);
+            }
+        })));
         items.add(check("Основная камера в кружках", () -> NekoConfig.rearVideoMessages.Bool(), NekoConfig.rearVideoMessages::setConfigBool));
         items.add(check("Статичный зум", ChickengramConfig::staticZoom, ChickengramConfig::setStaticZoom));
         items.add(UItem.asShadow("При записи видеосообщений уровень приближения не будет сбрасываться, если отпустить пальцы."));
@@ -233,6 +239,7 @@ public class ChatsPreferencesActivity extends BasePreferencesFragment {
         }
         final int selectedSeek = seekIndex;
         items.add(button(0, "Перемотка двойным нажатием", SEEK_TITLES[selectedSeek], v -> choose("Перемотка двойным нажатием", SEEK_TITLES, selectedSeek, index -> ChickengramConfig.setDoubleTapSeek(SEEK_VALUES[index]))));
+        items.add(check("Предпочитать исходное качество", () -> NaConfig.INSTANCE.getDefaultHlsVideoQuality().Int() == 1, v -> NaConfig.INSTANCE.getDefaultHlsVideoQuality().setConfigInt(v ? 1 : 0)));
         items.add(check("Включение звука кнопками громкости", ChickengramConfig::volumeUnmute, ChickengramConfig::setVolumeUnmute));
         items.add(check("Автопауза", () -> NekoConfig.autoPauseVideo.Bool(), NekoConfig.autoPauseVideo::setConfigBool));
         items.add(UItem.asShadow("Кнопки громкости включают звук в видео вместо изменения системной громкости. Автопауза останавливает видео, когда телефон заблокирован или приложение свёрнуто."));

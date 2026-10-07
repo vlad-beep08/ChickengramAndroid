@@ -46157,9 +46157,7 @@ public class ChatActivity extends BaseFragment implements
                 break;
             }
             case nkbtn_ask_ai: {
-                presentFragment(new com.chickengram.ui.ai.AiChatActivity(-1, "«" + selectedObject.messageOwner.message + "»
-
-"));
+                presentFragment(new com.chickengram.ui.ai.AiChatActivity(-1, "«" + selectedObject.messageOwner.message + "»" + (char) 10 + (char) 10));
                 break;
             }
             case nkbtn_view_history: {

@@ -376,9 +376,24 @@ public class StoryViewer implements NotificationCenter.NotificationCenterDelegat
     public void open(Context context, TL_stories.StoryItem storyItem, ArrayList<Long> peerIds, int position, StoriesController.StoriesList storiesList, TL_stories.PeerStories userStories, PlaceProvider placeProvider, boolean reversed) {
         open(UserConfig.selectedAccount, context, storyItem, peerIds, position, storiesList, userStories, placeProvider, reversed);
     }
+    private static boolean chickengramGhostAsked;
+
     public void open(int account, Context context, TL_stories.StoryItem storyItem, ArrayList<Long> peerIds, int position, StoriesController.StoriesList storiesList, TL_stories.PeerStories userStories, PlaceProvider placeProvider, boolean reversed) {
         if (!isContextSafe(context)) {
             doOnAnimationReadyRunnables.clear();
+            return;
+        }
+        if (!chickengramGhostAsked && com.chickengram.ChickengramConfig.suggestGhostStories() && tw.nekomimi.nekogram.NekoConfig.sendReadStoryPackets && !isShowing) {
+            chickengramGhostAsked = true;
+            final org.telegram.ui.ActionBar.AlertDialog.Builder builder = new org.telegram.ui.ActionBar.AlertDialog.Builder(context);
+            builder.setTitle("Смотреть незаметно?");
+            builder.setMessage("Автор увидит, что вы посмотрели историю. Включить режим призрака для историй?");
+            builder.setPositiveButton("Включить", (dialog, which) -> {
+                tw.nekomimi.nekogram.NekoConfig.putBoolean("sendReadStoryPackets", tw.nekomimi.nekogram.NekoConfig.sendReadStoryPackets = false);
+                open(account, context, storyItem, peerIds, position, storiesList, userStories, placeProvider, reversed);
+            });
+            builder.setNegativeButton("Смотреть открыто", (dialog, which) -> open(account, context, storyItem, peerIds, position, storiesList, userStories, placeProvider, reversed));
+            builder.show();
             return;
         }
         if (openCloseAnimator != null) {

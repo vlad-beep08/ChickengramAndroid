@@ -69,6 +69,9 @@ public class GhostPreferencesActivity extends BasePreferencesFragment {
         items.add(check("Отправлять без звука", com.chickengram.ChickengramConfig::silentSend, com.chickengram.ChickengramConfig::setSilentSend));
         items.add(UItem.asShadow("Все сообщения будут отправляться без уведомления для получателя."));
 
+        items.add(check("Предлагать призрака для историй", com.chickengram.ChickengramConfig::suggestGhostStories, com.chickengram.ChickengramConfig::setSuggestGhostStories));
+        items.add(UItem.asShadow("Перед первым просмотром историй за сеанс спросит, не включить ли режим призрака, чтобы автор не узнал о просмотре."));
+
         items.add(check("Кнопка призрака в боковом меню", () -> NekoConfig.showGhostToggleInDrawer, v -> {
             NekoConfig.putBoolean("showGhostToggleInDrawer", NekoConfig.showGhostToggleInDrawer = v);
             notifyDrawer();

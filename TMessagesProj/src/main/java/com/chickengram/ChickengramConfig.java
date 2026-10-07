@@ -60,6 +60,7 @@ public final class ChickengramConfig {
     private static boolean replyColors;
     private static boolean replyEmoji;
     private static boolean replyBackground;
+    private static boolean suggestGhostStories;
 
     private ChickengramConfig() {
     }
@@ -102,6 +103,7 @@ public final class ChickengramConfig {
             replyColors = p.getBoolean("replyColors", true);
             replyEmoji = p.getBoolean("replyEmoji", true);
             replyBackground = p.getBoolean("replyBackground", true);
+            suggestGhostStories = p.getBoolean("suggestGhostStories", true);
             loaded = true;
         }
     }
@@ -370,6 +372,15 @@ public final class ChickengramConfig {
 
     public static void setReplyBackground(boolean value) {
         replyBackground = put("replyBackground", value);
+    }
+
+    public static boolean suggestGhostStories() {
+        ensureLoaded();
+        return suggestGhostStories;
+    }
+
+    public static void setSuggestGhostStories(boolean value) {
+        suggestGhostStories = put("suggestGhostStories", value);
     }
 
     public static void reset() {
