@@ -53,6 +53,13 @@ public final class ChickengramConfig {
     private static int deletedMarkStyle;
     private static int deletedMarkColor;
     private static int swipeAction;
+    private static boolean silentSend;
+    private static boolean saveLastOnline;
+    private static boolean ghostSchedule;
+    private static boolean ghostTitle;
+    private static boolean replyColors;
+    private static boolean replyEmoji;
+    private static boolean replyBackground;
 
     private ChickengramConfig() {
     }
@@ -88,6 +95,13 @@ public final class ChickengramConfig {
             deletedMarkStyle = p.getInt("deletedMarkStyle", DELETED_MARK_ICON);
             deletedMarkColor = p.getInt("deletedMarkColor", 1);
             swipeAction = p.getInt("swipeAction", SWIPE_REPLY);
+            silentSend = p.getBoolean("silentSend", false);
+            saveLastOnline = p.getBoolean("saveLastOnline", true);
+            ghostSchedule = p.getBoolean("ghostSchedule", false);
+            ghostTitle = p.getBoolean("ghostTitle", false);
+            replyColors = p.getBoolean("replyColors", true);
+            replyEmoji = p.getBoolean("replyEmoji", true);
+            replyBackground = p.getBoolean("replyBackground", true);
             loaded = true;
         }
     }
@@ -293,6 +307,69 @@ public final class ChickengramConfig {
 
     public static void setSwipeAction(int value) {
         swipeAction = put("swipeAction", value);
+    }
+
+    public static boolean silentSend() {
+        ensureLoaded();
+        return silentSend;
+    }
+
+    public static void setSilentSend(boolean value) {
+        silentSend = put("silentSend", value);
+    }
+
+    public static boolean saveLastOnline() {
+        ensureLoaded();
+        return saveLastOnline;
+    }
+
+    public static void setSaveLastOnline(boolean value) {
+        saveLastOnline = put("saveLastOnline", value);
+    }
+
+    public static boolean ghostSchedule() {
+        ensureLoaded();
+        return ghostSchedule;
+    }
+
+    public static void setGhostSchedule(boolean value) {
+        ghostSchedule = put("ghostSchedule", value);
+    }
+
+    public static boolean ghostTitle() {
+        ensureLoaded();
+        return ghostTitle;
+    }
+
+    public static void setGhostTitle(boolean value) {
+        ghostTitle = put("ghostTitle", value);
+    }
+
+    public static boolean replyColors() {
+        ensureLoaded();
+        return replyColors;
+    }
+
+    public static void setReplyColors(boolean value) {
+        replyColors = put("replyColors", value);
+    }
+
+    public static boolean replyEmoji() {
+        ensureLoaded();
+        return replyEmoji;
+    }
+
+    public static void setReplyEmoji(boolean value) {
+        replyEmoji = put("replyEmoji", value);
+    }
+
+    public static boolean replyBackground() {
+        ensureLoaded();
+        return replyBackground;
+    }
+
+    public static void setReplyBackground(boolean value) {
+        replyBackground = put("replyBackground", value);
     }
 
     public static void reset() {

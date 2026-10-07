@@ -4283,6 +4283,16 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
     }
 
     public void sendMessage(SendMessageParams sendMessageParams) {
+        if (com.chickengram.ChickengramConfig.silentSend() && sendMessageParams.scheduleDate == 0) {
+            sendMessageParams.notify = false;
+        }
+        if (com.chickengram.ChickengramConfig.ghostSchedule() && !tw.nekomimi.nekogram.NekoConfig.sendOnlinePackets && sendMessageParams.scheduleDate == 0
+            && sendMessageParams.retryMessageObject == null && sendMessageParams.message != null
+            && sendMessageParams.photo == null && sendMessageParams.document == null && sendMessageParams.location == null
+            && sendMessageParams.poll == null && sendMessageParams.todo == null && sendMessageParams.game == null && sendMessageParams.invoice == null
+            && !DialogObject.isEncryptedDialog(sendMessageParams.peer) && sendMessageParams.peer != getUserConfig().getClientUserId()) {
+            sendMessageParams.scheduleDate = getConnectionsManager().getCurrentTime() + 12;
+        }
         final SendMessageChatArguments sendMessageChatArguments = sendMessageParams.sendMessageChatArguments != null ?
                 sendMessageParams.sendMessageChatArguments : SendMessageChatArguments.EMPTY;
         String message = sendMessageParams.message;

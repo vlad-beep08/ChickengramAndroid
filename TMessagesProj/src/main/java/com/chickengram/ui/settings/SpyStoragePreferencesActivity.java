@@ -32,6 +32,9 @@ public class SpyStoragePreferencesActivity extends BasePreferencesFragment {
         items.add(check("Сохранять историю правок", ChickengramConfig::saveEditHistory, ChickengramConfig::setSaveEditHistory));
         items.add(UItem.asShadow("Удалённые сообщения остаются в чате и в профиле с пометкой. Старые версии изменённых сообщений можно посмотреть в меню сообщения → «История изменений». Сохранено удалённых: " + DeletedMessages.count() + ", правок: " + EditHistory.count() + "."));
 
+        items.add(check("Сохранять последний онлайн", ChickengramConfig::saveLastOnline, ChickengramConfig::setSaveLastOnline));
+        items.add(UItem.asShadow("Запоминает, когда человек со скрытым временем захода в последний раз писал или печатал. Вместо «был(а) недавно» покажется примерное время со знаком ≈."));
+
         items.add(UItem.asHeader("База данных"));
         items.add(button(R.drawable.msg_shareout, "Экспорт базы данных", null, v -> exportDatabase()));
         items.add(button(R.drawable.msg_download, "Импорт базы данных", null, v -> presentFragment(createImportPicker())));
@@ -42,6 +45,7 @@ public class SpyStoragePreferencesActivity extends BasePreferencesFragment {
             () -> {
                 DeletedMessages.clear();
                 EditHistory.clear();
+                com.chickengram.messages.LastOnline.clear();
                 refresh();
             })).red());
         items.add(UItem.asShadow("Экспорт сохраняет базу удалённых сообщений в файл, чтобы перенести её на другой телефон или сделать резервную копию."));

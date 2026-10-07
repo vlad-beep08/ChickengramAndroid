@@ -3622,9 +3622,12 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
                     TLRPC.User self = UserConfig.getInstance(currentAccount).getCurrentUser();
                     if (self != null && self.first_name != null) title = self.first_name;
                 }
+                if (com.chickengram.ChickengramConfig.ghostTitle() && NekoConfig.isGhostModeActive()) {
+                    title = title + " 👻";
+                }
                 actionBar.centerTitle(false);
                 if (title.equals(getString(R.string.NekoX)) && !NaConfig.INSTANCE.getUseSystemFontInTitle().Bool()) {
-                    logoDrawable = context.getResources().getDrawable(R.drawable.nagram_logo_2).mutate();
+                    logoDrawable = new com.chickengram.ui.TitleTextDrawable(title, 20);
                     logoDrawable.setBounds(0, dp(2), logoDrawable.getIntrinsicWidth(), dp(2) + logoDrawable.getIntrinsicHeight());
                     logoDrawable.setColorFilter(getThemedColor(Theme.key_telegram_color_dialogsLogo), PorterDuff.Mode.MULTIPLY);
                     SpannableStringBuilder ssb = new SpannableStringBuilder(title);

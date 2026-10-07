@@ -104,6 +104,10 @@ public class AppearancePreferencesActivity extends BasePreferencesFragment {
         items.add(restartCheck("Системные эмодзи", () -> NekoConfig.useSystemEmoji.Bool(), NekoConfig.useSystemEmoji::setConfigBool));
         items.add(restartCheck("Переключатели в стиле Material 3", () -> NaConfig.INSTANCE.getSwitchStyle().Int() != 0, v -> NaConfig.INSTANCE.getSwitchStyle().setConfigInt(v ? 1 : 0)));
         items.add(restartCheck("Заголовок чата в стиле Material 3", () -> NaConfig.INSTANCE.getMaterialDesign3ChatHeader().Bool(), v -> NaConfig.INSTANCE.getMaterialDesign3ChatHeader().setConfigBool(v)));
+        items.add(check("Различные темы в чатах", () -> !NaConfig.INSTANCE.getDisableCustomWallpaperUser().Bool(), v -> {
+            NaConfig.INSTANCE.getDisableCustomWallpaperUser().setConfigBool(!v);
+            NaConfig.INSTANCE.getDisableCustomWallpaperChannel().setConfigBool(!v);
+        }));
         items.add(check("«Липкая» анимация аватарок", () -> !NaConfig.INSTANCE.getDisableGooeyAvatarAnimation().Bool(), v -> NaConfig.INSTANCE.getDisableGooeyAvatarAnimation().setConfigBool(!v)));
         items.add(check("Отключить разделители", ChickengramConfig::disableDividers, v -> {
             ChickengramConfig.setDisableDividers(v);

@@ -40,6 +40,7 @@ public class SpyCustomizationActivity extends BasePreferencesFragment {
         items.add(UItem.asHeader("Полезные функции"));
         items.add(restartCheck("Локальный Telegram Premium", () -> NekoConfig.localPremium.Bool(), NekoConfig.localPremium::setConfigBool));
         items.add(check("Отключить рекламу", () -> NekoConfig.hideSponsoredMessage.Bool(), NekoConfig.hideSponsoredMessage::setConfigBool));
+        items.add(restartCheck("Статус призрака в заголовке", ChickengramConfig::ghostTitle, ChickengramConfig::setGhostTitle));
         items.add(UItem.asShadow("С локальным Premium вы не получите увеличение лимитов и не сможете отправлять анимированные эмодзи. Другие пользователи не увидят ваш премиум-статус."));
     }
 }

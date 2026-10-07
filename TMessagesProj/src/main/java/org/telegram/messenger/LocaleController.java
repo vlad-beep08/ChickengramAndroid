@@ -3199,6 +3199,10 @@ public class LocaleController {
                 }
                 return getString("Online", R.string.Online);
             } else {
+                final int chickengramSeen = user.status.expires < 0 && user.status.expires != -1 ? com.chickengram.messages.LastOnline.get(user.id) : 0;
+                if (chickengramSeen > 0) {
+                    return "≈ " + formatDateOnline(chickengramSeen, madeShorter);
+                }
                 if (user.status.expires == -1) {
                     return getString("Invisible", R.string.Invisible);
                 } else if (user.status.expires == -100 || user.status.expires == -1000) {

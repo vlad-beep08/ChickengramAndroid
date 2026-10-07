@@ -134,6 +134,11 @@ public class ReplyMessageLine {
     private int wasColorId;
     private long wasCollectionId;
     private void resolveColor(MessageObject messageObject, int colorId, Theme.ResourcesProvider resourcesProvider) {
+        if (!com.chickengram.ChickengramConfig.replyColors()) {
+            color1 = color2 = color3 = Theme.getColor(messageObject != null && messageObject.isOutOwner() ? Theme.key_chat_outReplyLine : Theme.key_chat_inReplyLine, resourcesProvider);
+            hasColor2 = hasColor3 = false;
+            return;
+        }
         final boolean dark = resourcesProvider != null ? resourcesProvider.isDark() : Theme.isCurrentThemeDark();
         if (wasColorId != colorId) {
             final int msgId = messageObject != null ? messageObject.getId() : 0;
@@ -652,7 +657,7 @@ public class ReplyMessageLine {
     }
 
     public void drawBackground(Canvas canvas, RectF rect, float alpha, boolean hasQuote, boolean emojiOnly) {
-        if (!emojiOnly) {
+        if (!emojiOnly && com.chickengram.ChickengramConfig.replyBackground()) {
             backgroundPaint.setColor(Theme.multAlpha(backgroundColorAnimated.set(backgroundColor), alpha));
             if (RadiiUtils.radiiAreSame(radii)) {
                 canvas.drawRoundRect(rect, radii[0], radii[0], backgroundPaint);
@@ -663,7 +668,7 @@ public class ReplyMessageLine {
             }
         }
 
-        if (emoji != null) {
+        if (emoji != null && com.chickengram.ChickengramConfig.replyEmoji()) {
             final float loadedScale = emojiLoadedT.set(isEmojiLoaded());
 
             if (loadedScale > 0 && emojiAlpha > 0) {

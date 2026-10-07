@@ -28,6 +28,36 @@ public class ChatsPreferencesActivity extends BasePreferencesFragment {
     private static final String[] SEEK_TITLES = { "5 сек.", "10 сек.", "15 сек.", "30 сек." };
     private static final int[] SEEK_VALUES = { 5, 10, 15, 30 };
 
+    private boolean menuExpanded;
+    private boolean repliesExpanded;
+
+    private static final class MenuOption {
+        final String title;
+        final tw.nekomimi.nekogram.config.ConfigItem item;
+
+        MenuOption(String title, tw.nekomimi.nekogram.config.ConfigItem item) {
+            this.title = title;
+            this.item = item;
+        }
+    }
+
+    private static MenuOption[] menuOptions() {
+        return new MenuOption[] {
+            new MenuOption("Сохранить", NekoConfig.showAddToSavedMessages),
+            new MenuOption("Копировать фото", NaConfig.INSTANCE.getShowCopyPhoto()),
+            new MenuOption("Перевести", NekoConfig.showTranslate),
+            new MenuOption("Повторить", NekoConfig.showRepeat),
+            new MenuOption("Повторить копией", NaConfig.INSTANCE.getShowRepeatAsCopy()),
+            new MenuOption("Поделиться", NekoConfig.showShareMessages),
+            new MenuOption("Детали", NekoConfig.showMessageDetails),
+            new MenuOption("История сообщений", NekoConfig.showViewHistory),
+            new MenuOption("Очистить из кэша", NekoConfig.showDeleteDownloadedFile),
+            new MenuOption("Напоминание", NaConfig.INSTANCE.getShowSetReminder()),
+            new MenuOption("Скрыть", NekoConfig.showMessageHide),
+            new MenuOption("Пожаловаться", NekoConfig.showReport)
+        };
+    }
+
     @Override
     protected CharSequence getTitle() {
         return "Чаты";
@@ -40,7 +70,36 @@ public class ChatsPreferencesActivity extends BasePreferencesFragment {
             value -> value == 14 ? "По умолчанию" : String.valueOf(value),
             value -> NekoConfig.stickerSize.setConfigFloat(value.floatValue())));
         items.add(check("Скрыть время на стикерах", () -> NekoConfig.hideTimeForSticker.Bool(), NekoConfig.hideTimeForSticker::setConfigBool));
-        items.add(UItem.asShadow(null));
+        final int replyCount = (ChickengramConfig.replyColors() ? 1 : 0) + (ChickengramConfig.replyEmoji() ? 1 : 0) + (ChickengramConfig.replyBackground() ? 1 : 0);
+        final int repliesId = action(v -> {
+            repliesExpanded = !repliesExpanded;
+            refresh();
+        });
+        items.add(UItem.asExpandableSwitch(repliesId, "Ответы", replyCount + "/3")
+            .setChecked(replyCount > 0)
+            .setCollapsed(!repliesExpanded)
+            .setClickCallback(v -> {
+                final boolean value = replyCount < 3;
+                ChickengramConfig.setReplyColors(value);
+                ChickengramConfig.setReplyEmoji(value);
+                ChickengramConfig.setReplyBackground(value);
+                refresh();
+            }));
+        if (repliesExpanded) {
+            items.add(UItem.asRoundCheckbox(action(v -> {
+                ChickengramConfig.setReplyColors(!ChickengramConfig.replyColors());
+                refresh();
+            }), "Цвета").setChecked(ChickengramConfig.replyColors()).setPad(1));
+            items.add(UItem.asRoundCheckbox(action(v -> {
+                ChickengramConfig.setReplyEmoji(!ChickengramConfig.replyEmoji());
+                refresh();
+            }), "Эмодзи").setChecked(ChickengramConfig.replyEmoji()).setPad(1));
+            items.add(UItem.asRoundCheckbox(action(v -> {
+                ChickengramConfig.setReplyBackground(!ChickengramConfig.replyBackground());
+                refresh();
+            }), "Фон").setChecked(ChickengramConfig.replyBackground()).setPad(1));
+        }
+        items.add(UItem.asShadow("«Ответы» — оформление цитат при ответе на сообщение: цвет собеседника, узор из эмодзи и фон."));
 
         items.add(UItem.asHeader("Форма стикеров"));
         final int shape = ChickengramConfig.stickerShape();
@@ -80,7 +139,38 @@ public class ChatsPreferencesActivity extends BasePreferencesFragment {
         items.add(check("Показывать число пересылок", () -> NaConfig.INSTANCE.getShowForwardCount().Bool(), v -> NaConfig.INSTANCE.getShowForwardCount().setConfigBool(v)));
         items.add(check("Скрыть боковую кнопку «Поделиться»", ChickengramConfig::hideShareButton, ChickengramConfig::setHideShareButton));
         items.add(check("Итоги до голосования", () -> NaConfig.INSTANCE.getShowVoteCountBeforeVote().Bool(), v -> NaConfig.INSTANCE.getShowVoteCountBeforeVote().setConfigBool(v)));
-        items.add(UItem.asShadow("Итоги до голосования показывают результаты опроса до того, как вы проголосуете."));
+        final MenuOption[] options = menuOptions();
+        int enabledOptions = 0;
+        for (MenuOption option : options) {
+            if (option.item.Bool()) {
+                enabledOptions++;
+            }
+        }
+        final int allEnabled = enabledOptions;
+        final int menuId = action(v -> {
+            menuExpanded = !menuExpanded;
+            refresh();
+        });
+        items.add(UItem.asExpandableSwitch(menuId, "Меню сообщения", enabledOptions + "/" + options.length)
+            .setChecked(enabledOptions > 0)
+            .setCollapsed(!menuExpanded)
+            .setClickCallback(v -> {
+                final boolean value = allEnabled < options.length;
+                for (MenuOption option : options) {
+                    option.item.setConfigBool(value);
+                }
+                refresh();
+            }));
+        if (menuExpanded) {
+            for (MenuOption option : options) {
+                final int id = action(v -> {
+                    option.item.setConfigBool(!option.item.Bool());
+                    refresh();
+                });
+                items.add(UItem.asRoundCheckbox(id, option.title).setChecked(option.item.Bool()).setPad(1));
+            }
+        }
+        items.add(UItem.asShadow("Итоги до голосования показывают результаты опроса до того, как вы проголосуете. В «Меню сообщения» можно выбрать пункты, которые появляются по нажатию на сообщение."));
 
         items.add(UItem.asHeader("Камера"));
         items.add(check("Основная камера в кружках", () -> NekoConfig.rearVideoMessages.Bool(), NekoConfig.rearVideoMessages::setConfigBool));

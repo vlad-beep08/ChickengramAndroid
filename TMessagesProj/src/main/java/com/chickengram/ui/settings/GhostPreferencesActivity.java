@@ -63,6 +63,12 @@ public class GhostPreferencesActivity extends BasePreferencesFragment {
         }));
         items.add(UItem.asShadow("Автоматически читает сообщения, когда вы отправляете новое сообщение или ставите реакцию."));
 
+        items.add(check("Использовать отложку", com.chickengram.ChickengramConfig::ghostSchedule, com.chickengram.ChickengramConfig::setGhostSchedule));
+        items.add(UItem.asShadow("Когда скрыт «онлайн», текстовые сообщения отправляются как отложенные на ~12 секунд, чтобы вы не появлялись в сети. Не рекомендуется на слабом интернете."));
+
+        items.add(check("Отправлять без звука", com.chickengram.ChickengramConfig::silentSend, com.chickengram.ChickengramConfig::setSilentSend));
+        items.add(UItem.asShadow("Все сообщения будут отправляться без уведомления для получателя."));
+
         items.add(check("Кнопка призрака в боковом меню", () -> NekoConfig.showGhostToggleInDrawer, v -> {
             NekoConfig.putBoolean("showGhostToggleInDrawer", NekoConfig.showGhostToggleInDrawer = v);
             notifyDrawer();
