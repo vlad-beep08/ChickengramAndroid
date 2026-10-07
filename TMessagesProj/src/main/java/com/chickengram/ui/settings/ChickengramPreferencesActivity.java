@@ -27,6 +27,7 @@ public class ChickengramPreferencesActivity extends BasePreferencesFragment {
         items.add(button(R.drawable.msg_palette, "Внешний вид", null, v -> presentFragment(new AppearancePreferencesActivity())));
         items.add(button(R.drawable.msg_discussion, "Чаты", null, v -> presentFragment(new ChatsPreferencesActivity())));
         items.add(button(R.drawable.msg_fave, "Другое", null, v -> presentFragment(new OtherPreferencesActivity())));
+        items.add(button(R.drawable.msg_bot, "ИИ-чат", null, v -> presentFragment(new AiChatSettingsActivity())));
         items.add(UItem.asShadow(null));
         items.add(UItem.asHeader("Ссылки"));
         items.add(button(R.drawable.msg_link, "Исходный код", "GitHub", v -> Browser.openUrl(getParentActivity(), "https://github.com/vlad-beep08/ChickengramAndroid")));

@@ -2,6 +2,7 @@ package com.chickengram.ui.settings;
 
 import com.chickengram.ChickengramConfig;
 
+import org.telegram.messenger.R;
 import org.telegram.ui.Components.UItem;
 
 import java.util.ArrayList;
@@ -156,6 +157,7 @@ public class ChatsPreferencesActivity extends BasePreferencesFragment {
         }
         items.add(check("Сводка для любого длинного сообщения", () -> NaConfig.INSTANCE.getSummarizeTextButton().Int() == SUMMARY_ALWAYS,
             v -> NaConfig.INSTANCE.getSummarizeTextButton().setConfigInt(v ? SUMMARY_ALWAYS : SUMMARY_DEFAULT)));
+        items.add(button(R.drawable.msg_bot, "ИИ-чат", null, v -> presentFragment(new AiChatSettingsActivity())));
         items.add(button(0, "ИИ-сервис", null, v -> presentFragment(new tw.nekomimi.nekogram.settings.NekoLLMSettingsActivity())));
         items.add(check("Переводить через ИИ", () -> NekoConfig.translationProvider.Int() == TRANSLATOR_LLM,
             v -> NekoConfig.translationProvider.setConfigInt(v ? TRANSLATOR_LLM : TRANSLATOR_GOOGLE)));
