@@ -177,6 +177,7 @@ public class ChatsPreferencesActivity extends BasePreferencesFragment {
         items.add(UItem.asShadow("Результаты вычислений: напишите «2+2=» и пробел — результат подставится сам. Кнопка ЖОПА появится у поля ввода при следующем открытии чата."));
 
         items.add(UItem.asHeader("Сообщения"));
+        items.add(check("Широкие посты в каналах", ChickengramConfig::widePosts, ChickengramConfig::setWidePosts));
         items.add(check("Убрать хвост у сообщений", ChickengramConfig::removeMessageTail, ChickengramConfig::setRemoveMessageTail));
         items.add(check("Заменять «изменено» иконкой", () -> NaConfig.INSTANCE.getShowEditedIcon().Bool(), v -> NaConfig.INSTANCE.getShowEditedIcon().setConfigBool(v)));
         items.add(check("Показывать индикатор онлайна", () -> NaConfig.INSTANCE.getShowOnlineStatus().Bool(), v -> NaConfig.INSTANCE.getShowOnlineStatus().setConfigBool(v)));

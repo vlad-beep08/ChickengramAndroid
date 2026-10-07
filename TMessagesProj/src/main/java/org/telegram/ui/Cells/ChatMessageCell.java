@@ -7462,9 +7462,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
 
                 final boolean isArticle = messageObject.type == MessageObject.TYPE_ARTICLE;
                 if (AndroidUtilities.isTablet()) {
-                    maxWidth = AndroidUtilities.getMinTabletSide() - dp((isArticle ? 40 : 80) + (isSideMenuEnabled ? ChatActivity.SIDE_MENU_WIDTH : drawAvatar ? 42 : 0));
+                    maxWidth = AndroidUtilities.getMinTabletSide() - dp((isArticle ? 40 : chickengramWidePost(messageObject) ? 48 : 80) + (isSideMenuEnabled ? ChatActivity.SIDE_MENU_WIDTH : drawAvatar ? 42 : 0));
                 } else {
-                    maxWidth = Math.min(getParentWidth(), AndroidUtilities.displaySize.y) - dp((isArticle ? 40 : 80) + (isSideMenuEnabled ? ChatActivity.SIDE_MENU_WIDTH : drawAvatar ? 42 : 0));
+                    maxWidth = Math.min(getParentWidth(), AndroidUtilities.displaySize.y) - dp((isArticle ? 40 : chickengramWidePost(messageObject) ? 48 : 80) + (isSideMenuEnabled ? ChatActivity.SIDE_MENU_WIDTH : drawAvatar ? 42 : 0));
                 }
                 drawName = drawAvatar || isPinnedChat || isSavedChat && !messageObject.isOutOwner() && (messageObject.getSavedDialogId() < 0 || messageObject.getSavedDialogId() == UserObject.ANONYMOUS) || (messageObject.messageOwner.peer_id != null && messageObject.messageOwner.peer_id.channel_id != 0 && (!messageObject.isOutOwner() || messageObject.isSupergroup())) || messageObject.isImportedForward() && messageObject.messageOwner.fwd_from.from_id == null;
 
@@ -9916,7 +9916,7 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
                                     messageObject.type == MessageObject.TYPE_EXTENDED_MEDIA_PREVIEW ||
                                     messageObject.type == MessageObject.TYPE_VIDEO ||
                                     messageObject.type == MessageObject.TYPE_GIF
-                                ) && currentPhotoObject.w >= currentPhotoObject.h
+                                ) && (currentPhotoObject.w >= currentPhotoObject.h || chickengramWidePost(messageObject))
                             ) {
                                 photoWidth = Math.min(getParentWidth(), AndroidUtilities.displaySize.y) - dp(64 + (checkNeedDrawShareButton(messageObject) ? 10 : 0));
                                 useFullWidth = true;
@@ -28329,6 +28329,10 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
             buttonY = (int) (photoImage.getImageY() + (photoImage.getImageHeight() - dp(48)) / 2);
             radialProgress.setProgressRect(buttonX, buttonY, buttonX + dp(48), buttonY + dp(48));
         }
+    }
+
+    private boolean chickengramWidePost(MessageObject messageObject) {
+        return com.chickengram.ChickengramConfig.widePosts() && messageObject != null && currentChat != null && ChatObject.isChannel(currentChat) && !currentChat.megagroup;
     }
 
     private float chickengramDeletedAlpha() {

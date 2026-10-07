@@ -85,6 +85,9 @@ public class AppearancePreferencesActivity extends BasePreferencesFragment {
         items.add(UItem.asCustom(iconsCell));
         items.add(UItem.asShadow("Иконка на рабочем столе. Лаунчер может обновить её не сразу."));
 
+        items.add(button(R.drawable.msg_customize, "Pill Stack", null, v -> presentFragment(new PillStackPreferencesActivity())));
+        items.add(UItem.asShadow("Интерактивные кнопки в поле поиска на главном экране: призрак, Избранное, Архив, ИИ-чат."));
+
         items.add(UItem.asHeader("Наборы иконок"));
         items.add(restartCheck("Набор иконок «Solar»", ChickengramConfig::solarIcons, ChickengramConfig::setSolarIcons));
         items.add(UItem.asShadow("Заменяет иконки меню, кнопок и папок на набор «Solar», как в exteraGram."));
@@ -116,6 +119,19 @@ public class AppearancePreferencesActivity extends BasePreferencesFragment {
             }
         }));
         items.add(UItem.asShadow("Разделители — тонкие линии между пунктами списков."));
+
+        items.add(UItem.asHeader("Секции"));
+        final int[] radiusValues = { 0, 8, 12, 16, 20, 24, 28 };
+        final int currentRadius = ChickengramConfig.sectionRadius() < 0 ? 16 : ChickengramConfig.sectionRadius();
+        int radiusIndex = 3;
+        for (int i = 0; i < radiusValues.length; i++) {
+            if (radiusValues[i] == currentRadius) {
+                radiusIndex = i;
+            }
+        }
+        items.add(UItem.asSlideView(new String[] { "Откл.", "8", "12", "16", "20", "24", "Макс" }, radiusIndex, index -> ChickengramConfig.setSectionRadius(radiusValues[index])));
+        items.add(check("Отделить заголовки", ChickengramConfig::separateHeaders, ChickengramConfig::setSeparateHeaders));
+        items.add(UItem.asShadow("Скругление карточек в настройках. «Откл.» — плоские секции на всю ширину. Изменения видны при повторном открытии экрана."));
 
         items.add(UItem.asHeader("Настройки размытия"));
         items.add(check("Блики на стекле", () -> !NaConfig.INSTANCE.getDisableGlareEffects().Bool(), v -> NaConfig.INSTANCE.getDisableGlareEffects().setConfigBool(!v)));

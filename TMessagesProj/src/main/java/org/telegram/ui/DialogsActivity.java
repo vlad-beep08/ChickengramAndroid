@@ -1640,6 +1640,66 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
         }
     }
 
+    private ActionBarMenuItem chickengramGhostPill;
+
+    private void addChickengramPills(ActionBarMenu menu) {
+        if (com.chickengram.ChickengramConfig.pillGhost()) {
+            chickengramGhostPill = menu.addItem(-4701, R.drawable.ghost);
+            AndroidUtilities.removeFromParent(chickengramGhostPill);
+            chickengramGhostPill.setContentDescription("Режим призрака");
+            chickengramGhostPill.setOnClickListener(v -> {
+                NekoConfig.toggleGhostMode();
+                tw.nekomimi.nekogram.utils.AyuGhostUtils.setAllowReadPacket(false, -1);
+                getNotificationCenter().postNotificationName(NotificationCenter.mainUserInfoChanged);
+                updateChickengramGhostPill();
+                BulletinFactory.of(this).createSimpleBulletin(R.raw.info, NekoConfig.isGhostModeActive() ? "Режим призрака включён" : "Режим призрака выключен").show();
+            });
+            fragmentSearchField.addAdditionalIcon(chickengramGhostPill);
+        }
+        if (com.chickengram.ChickengramConfig.pillSaved()) {
+            final ActionBarMenuItem saved = menu.addItem(-4702, R.drawable.msg_saved);
+            AndroidUtilities.removeFromParent(saved);
+            saved.setContentDescription("Избранное");
+            saved.setOnClickListener(v -> {
+                final Bundle args = new Bundle();
+                args.putLong("user_id", getUserConfig().getClientUserId());
+                presentFragment(new ChatActivity(args));
+            });
+            fragmentSearchField.addAdditionalIcon(saved);
+        }
+        if (com.chickengram.ChickengramConfig.pillArchive()) {
+            final ActionBarMenuItem archive = menu.addItem(-4703, R.drawable.msg_archive);
+            AndroidUtilities.removeFromParent(archive);
+            archive.setContentDescription("Архив");
+            archive.setOnClickListener(v -> {
+                final Bundle args = new Bundle();
+                args.putInt("folderId", 1);
+                presentFragment(new DialogsActivity(args));
+            });
+            fragmentSearchField.addAdditionalIcon(archive);
+        }
+        if (com.chickengram.ChickengramConfig.pillAi()) {
+            final ActionBarMenuItem ai = menu.addItem(-4704, R.drawable.msg_bot);
+            AndroidUtilities.removeFromParent(ai);
+            ai.setContentDescription("ИИ-чат");
+            ai.setOnClickListener(v -> presentFragment(new com.chickengram.ui.ai.AiChatActivity()));
+            fragmentSearchField.addAdditionalIcon(ai);
+        }
+        fragmentSearchField.updateColors();
+        updateChickengramGhostPill();
+    }
+
+    private void updateChickengramGhostPill() {
+        if (chickengramGhostPill == null || chickengramGhostPill.getIconView() == null) {
+            return;
+        }
+        if (NekoConfig.isGhostModeActive()) {
+            chickengramGhostPill.getIconView().setColorFilter(new PorterDuffColorFilter(getThemedColor(Theme.key_featuredStickers_addButton), PorterDuff.Mode.SRC_IN));
+        } else {
+            chickengramGhostPill.getIconView().setColorFilter(Theme.multAlpha(getThemedColor(Theme.key_windowBackgroundWhiteBlackText), 0.6f), PorterDuff.Mode.MULTIPLY);
+        }
+    }
+
     private float getSearchFieldAdditionOffset() {
         return -lerp(dp(4), dp(SEARCH_FIELD_HEIGHT), animatorSearchVisible.getFloatValue());
     }
@@ -3377,6 +3437,9 @@ public class DialogsActivity extends BaseFragment implements NotificationCenter.
             });
             fragmentSearchField.addAdditionalIcon(scanItem);
             fragmentSearchField.updateColors();
+            if (folderId == 0) {
+                addChickengramPills(menu);
+            }
         }
 
         fragmentSearchField.setCloseButtonOnClickListener(() -> {

@@ -3287,7 +3287,7 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
     }
     public void setSections(int padding, float roundRadius, boolean topPadding) {
         setSections(
-            view -> !(view instanceof TextInfoPrivacyCell || view instanceof ShadowSectionCell || view instanceof FiltersSetupActivity.HintInnerCell || view instanceof GraySectionCell || view instanceof CollapseTextCell) && !Objects.equals(view.getTag(), TAG_NOT_SECTION),
+            view -> !(view instanceof TextInfoPrivacyCell || view instanceof ShadowSectionCell || view instanceof FiltersSetupActivity.HintInnerCell || view instanceof GraySectionCell || view instanceof CollapseTextCell) && !Objects.equals(view.getTag(), TAG_NOT_SECTION) && !(com.chickengram.ChickengramConfig.separateHeaders() && view instanceof org.telegram.ui.Cells.HeaderCell),
             padding,
             roundRadius,
             this::drawBackgroundRect,
@@ -3335,6 +3335,13 @@ public class RecyclerListView extends RecyclerView implements IBlur3Capture {
         Utilities.Callback5<Canvas, RectF, Float, Float, Float> drawSectionBackground,
         boolean topPadding
     ) {
+        final int chickengramRadius = com.chickengram.ChickengramConfig.sectionRadius();
+        if (chickengramRadius >= 0) {
+            roundRadius = dp(chickengramRadius);
+            if (chickengramRadius == 0) {
+                padding = 0;
+            }
+        }
         setSelectorDrawableColor(getThemedColor(Theme.key_settings_listSelector));
         this.isViewTypeSection = isViewTypeSection;
         this.sectionRadius = roundRadius;

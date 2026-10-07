@@ -62,6 +62,13 @@ public final class ChickengramConfig {
     private static boolean replyBackground;
     private static boolean suggestGhostStories;
     private static boolean aiTranscribe;
+    private static int sectionRadius;
+    private static boolean separateHeaders;
+    private static boolean widePosts;
+    private static boolean pillGhost;
+    private static boolean pillSaved;
+    private static boolean pillArchive;
+    private static boolean pillAi;
 
     private ChickengramConfig() {
     }
@@ -106,6 +113,13 @@ public final class ChickengramConfig {
             replyBackground = p.getBoolean("replyBackground", true);
             suggestGhostStories = p.getBoolean("suggestGhostStories", true);
             aiTranscribe = p.getBoolean("aiTranscribe", false);
+            sectionRadius = p.getInt("sectionRadius", -1);
+            separateHeaders = p.getBoolean("separateHeaders", false);
+            widePosts = p.getBoolean("widePosts", false);
+            pillGhost = p.getBoolean("pillGhost", true);
+            pillSaved = p.getBoolean("pillSaved", true);
+            pillArchive = p.getBoolean("pillArchive", false);
+            pillAi = p.getBoolean("pillAi", false);
             loaded = true;
         }
     }
@@ -392,6 +406,69 @@ public final class ChickengramConfig {
 
     public static void setAiTranscribe(boolean value) {
         aiTranscribe = put("aiTranscribe", value);
+    }
+
+    public static int sectionRadius() {
+        ensureLoaded();
+        return sectionRadius;
+    }
+
+    public static void setSectionRadius(int value) {
+        sectionRadius = put("sectionRadius", value);
+    }
+
+    public static boolean separateHeaders() {
+        ensureLoaded();
+        return separateHeaders;
+    }
+
+    public static void setSeparateHeaders(boolean value) {
+        separateHeaders = put("separateHeaders", value);
+    }
+
+    public static boolean widePosts() {
+        ensureLoaded();
+        return widePosts;
+    }
+
+    public static void setWidePosts(boolean value) {
+        widePosts = put("widePosts", value);
+    }
+
+    public static boolean pillGhost() {
+        ensureLoaded();
+        return pillGhost;
+    }
+
+    public static void setPillGhost(boolean value) {
+        pillGhost = put("pillGhost", value);
+    }
+
+    public static boolean pillSaved() {
+        ensureLoaded();
+        return pillSaved;
+    }
+
+    public static void setPillSaved(boolean value) {
+        pillSaved = put("pillSaved", value);
+    }
+
+    public static boolean pillArchive() {
+        ensureLoaded();
+        return pillArchive;
+    }
+
+    public static void setPillArchive(boolean value) {
+        pillArchive = put("pillArchive", value);
+    }
+
+    public static boolean pillAi() {
+        ensureLoaded();
+        return pillAi;
+    }
+
+    public static void setPillAi(boolean value) {
+        pillAi = put("pillAi", value);
     }
 
     public static void reset() {
