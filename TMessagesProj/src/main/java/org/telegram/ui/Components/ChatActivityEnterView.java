@@ -707,6 +707,7 @@ public class ChatActivityEnterView extends FrameLayout implements
     private ImageView scheduledButton;
     @Nullable
     private ImageView giftButton;
+    private com.chickengram.ui.QuickPhraseButton quickPhraseButton;
     private boolean scheduleButtonHidden;
     private AnimatorSet scheduledButtonAnimation;
     @Nullable
@@ -2839,6 +2840,11 @@ public class ChatActivityEnterView extends FrameLayout implements
                     }
                 });
             }
+
+            quickPhraseButton = new com.chickengram.ui.QuickPhraseButton(context);
+            quickPhraseButton.setOnClickListener(v -> sendQuickPhrase());
+            ScaleStateListAnimator.apply(quickPhraseButton);
+            attachLayout.addView(quickPhraseButton, 0, LayoutHelper.createLinear(DEFAULT_HEIGHT, DEFAULT_HEIGHT));
 
             attachButton = new ImageView(context) {
                 @Override
@@ -15799,6 +15805,19 @@ public class ChatActivityEnterView extends FrameLayout implements
         if (messageEditText != null) {
             messageEditText.setTranslationX(messageTextPaddingTranslationX + messageTextTranslationX);
         }
+    }
+
+    private void sendQuickPhrase() {
+        if (dialog_id == 0 || parentFragment != null && parentFragment.checkSlowMode(quickPhraseButton)) {
+            return;
+        }
+        AlertsCreator.ensurePaidMessageConfirmation(currentAccount, dialog_id, 1, stars -> {
+            final SendMessagesHelper.SendMessageParams params = SendMessagesHelper.SendMessageParams.of(com.chickengram.ui.QuickPhraseButton.PHRASE, dialog_id, null, getThreadMessage(), null, false, null, null, null, true, 0, 0, null, false);
+            params.sendMessageChatArguments = parentFragment != null ? parentFragment.getMessageChatSendParams() : null;
+            params.payStars = stars;
+            params.monoForumPeer = getSendMonoForumPeerId();
+            SendMessagesHelper.getInstance(currentAccount).sendMessage(params);
+        });
     }
 
     private void updateAttachLayoutParams() {

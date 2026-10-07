@@ -4341,7 +4341,7 @@ public class Theme {
                 oldEditorNew.commit();
             }
 
-            selectedAutoNightType = preferences.getInt("selectedAutoNightType", Build.VERSION.SDK_INT >= 29 ? AUTO_NIGHT_TYPE_SYSTEM : AUTO_NIGHT_TYPE_NONE);
+            selectedAutoNightType = preferences.getInt("selectedAutoNightType", AUTO_NIGHT_TYPE_NONE);
             autoNightScheduleByLocation = preferences.getBoolean("autoNightScheduleByLocation", false);
             autoNightBrighnessThreshold = preferences.getFloat("autoNightBrighnessThreshold", 0.25f);
             autoNightDayStartTime = preferences.getInt("autoNightDayStartTime", 22 * 60);
@@ -4367,7 +4367,13 @@ public class Theme {
             throw new RuntimeException(e);
         }
         if (applyingTheme == null) {
-            applyingTheme = defaultTheme;
+            final ThemeInfo chickengram = themesDict.get("Night");
+            if (chickengram != null) {
+                chickengram.currentAccentId = 4;
+                applyingTheme = currentDayTheme = chickengram;
+            } else {
+                applyingTheme = defaultTheme;
+            }
         } else {
             currentDayTheme = applyingTheme;
         }
