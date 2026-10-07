@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ChickengramIconOrange">Оранжевая</string>
+    <string name="ChickengramIconSunset">Закат</string>
+    <string name="ChickengramIconWhite">Белая</string>
+    <string name="ChickengramIconNeon">Неон</string>
+    <string name="ChickengramIconSpace">Космос</string>
+    <string name="ChickengramIconBlue">Синяя</string>
+    <string name="ChickengramIconNavy">Тёмно-синяя</string>
+    <string name="ChickengramIconAurora">Аврора</string>
+    <string name="ChickengramIconGold">Золотая</string>
+</resources>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ChickengramIconOrange">Orange</string>
+    <string name="ChickengramIconSunset">Sunset</string>
+    <string name="ChickengramIconWhite">White</string>
+    <string name="ChickengramIconNeon">Neon</string>
+    <string name="ChickengramIconSpace">Space</string>
+    <string name="ChickengramIconBlue">Blue</string>
+    <string name="ChickengramIconNavy">Navy</string>
+    <string name="ChickengramIconAurora">Aurora</string>
+    <string name="ChickengramIconGold">Gold</string>
+</resources>

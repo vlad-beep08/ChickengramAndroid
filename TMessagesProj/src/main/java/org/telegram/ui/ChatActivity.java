@@ -5379,7 +5379,7 @@ public class ChatActivity extends BaseFragment implements
                 if (e != null) {
                     wasManualScroll = true;
                 }
-                if (e != null && e.getAction() == MotionEvent.ACTION_DOWN && !startedTrackingSlidingView && !maybeStartTrackingSlidingView && slidingView == null && !inPreviewMode) {
+                if (e != null && e.getAction() == MotionEvent.ACTION_DOWN && !startedTrackingSlidingView && !maybeStartTrackingSlidingView && slidingView == null && !inPreviewMode && com.chickengram.ChickengramConfig.swipeAction() != com.chickengram.ChickengramConfig.SWIPE_DISABLED) {
                     View view = getPressedChildView();
                     if (view instanceof ChatMessageCell) {
                         if (slidingView != null) {
@@ -5450,7 +5450,9 @@ public class ChatActivity extends BaseFragment implements
                     if (e != null && e.getAction() != MotionEvent.ACTION_CANCEL && Math.abs(getSlidingNonAnimationTranslationX(false)) >= AndroidUtilities.dp(50)) {
                         MessageObject message = getSlidingMessageObject();
                         final boolean allowReplyOnOpenTopic = canSendMessageToTopic(message);
-                        if (
+                        if (com.chickengram.ChickengramConfig.swipeAction() != com.chickengram.ChickengramConfig.SWIPE_REPLY) {
+                            chickengramSwipeAction(message);
+                        } else if (
                             bottomChannelButtonsLayout != null && bottomChannelButtonsLayout.getVisibility() == View.VISIBLE && !(bottomOverlayChatWaitsReply && allowReplyOnOpenTopic || message.wasJustSent) ||
                             currentChat != null && (
                                 ChatObject.isNotInChat(currentChat) && !isThreadChat() ||
@@ -46307,6 +46309,31 @@ public class ChatActivity extends BaseFragment implements
 
     private TL_iv.RichMessage nkbtn_get_translate_rich_message(MessageObject messageObject) {
         return messageObject != null && messageObject.type == MessageObject.TYPE_ARTICLE && messageObject.messageOwner != null ? messageObject.messageOwner.rich_message : null;
+    }
+
+    private void chickengramSwipeAction(MessageObject message) {
+        if (message == null) {
+            return;
+        }
+        selectedObject = message;
+        selectedObjectGroup = getValidGroupedMessage(message);
+        switch (com.chickengram.ChickengramConfig.swipeAction()) {
+            case com.chickengram.ChickengramConfig.SWIPE_REPEAT:
+                processSelectedOption(nkbtn_repeat);
+                break;
+            case com.chickengram.ChickengramConfig.SWIPE_SAVE:
+                processSelectedOption(nkbtn_savemessage);
+                break;
+            case com.chickengram.ChickengramConfig.SWIPE_FORWARD:
+                processSelectedOption(OPTION_FORWARD);
+                break;
+            case com.chickengram.ChickengramConfig.SWIPE_TRANSLATE:
+                nkbtn_translate(selectedObject, selectedObjectGroup);
+                break;
+            case com.chickengram.ChickengramConfig.SWIPE_COPY:
+                processSelectedOption(OPTION_COPY);
+                break;
+        }
     }
 
     private void nkbtn_translate(MessageObject messageObject, MessageObject.GroupedMessages group) {

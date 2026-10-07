@@ -13,6 +13,14 @@ public final class ChickengramConfig {
     public static final int STICKER_SHAPE_ROUNDED = 1;
     public static final int STICKER_SHAPE_MESSAGE = 2;
 
+    public static final int SWIPE_REPLY = 0;
+    public static final int SWIPE_REPEAT = 1;
+    public static final int SWIPE_SAVE = 2;
+    public static final int SWIPE_FORWARD = 3;
+    public static final int SWIPE_TRANSLATE = 4;
+    public static final int SWIPE_COPY = 5;
+    public static final int SWIPE_DISABLED = 6;
+
     public static final int DELETED_MARK_ICON = 0;
     public static final int DELETED_MARK_TEXT = 1;
 
@@ -44,6 +52,7 @@ public final class ChickengramConfig {
     private static boolean semiTransparentDeleted;
     private static int deletedMarkStyle;
     private static int deletedMarkColor;
+    private static int swipeAction;
 
     private ChickengramConfig() {
     }
@@ -78,6 +87,7 @@ public final class ChickengramConfig {
             semiTransparentDeleted = p.getBoolean("semiTransparentDeleted", false);
             deletedMarkStyle = p.getInt("deletedMarkStyle", DELETED_MARK_ICON);
             deletedMarkColor = p.getInt("deletedMarkColor", 1);
+            swipeAction = p.getInt("swipeAction", SWIPE_REPLY);
             loaded = true;
         }
     }
@@ -274,6 +284,15 @@ public final class ChickengramConfig {
 
     public static void setDeletedMarkColor(int index) {
         deletedMarkColor = put("deletedMarkColor", index);
+    }
+
+    public static int swipeAction() {
+        ensureLoaded();
+        return swipeAction;
+    }
+
+    public static void setSwipeAction(int value) {
+        swipeAction = put("swipeAction", value);
     }
 
     public static void reset() {

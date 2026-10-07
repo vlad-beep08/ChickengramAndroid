@@ -19,6 +19,7 @@ public class AppearancePreferencesActivity extends BasePreferencesFragment {
     private static final int[] TAB_TITLE_VALUES = { NekoXConfig.TITLE_TYPE_TEXT, NekoXConfig.TITLE_TYPE_ICON, NekoXConfig.TITLE_TYPE_MIX };
 
     private AvatarCornersPreview avatarPreview;
+    private org.telegram.ui.Cells.AppIconsSelectorCell iconsCell;
     private boolean rebuildOnClose;
 
     @Override
@@ -77,7 +78,14 @@ public class AppearancePreferencesActivity extends BasePreferencesFragment {
         }));
         items.add(UItem.asShadow("Иконки папок синхронизируются с вашим аккаунтом."));
 
-        items.add(UItem.asHeader("Иконки"));
+        if (iconsCell == null) {
+            iconsCell = new org.telegram.ui.Cells.AppIconsSelectorCell(getContext(), this, currentAccount);
+        }
+        items.add(UItem.asHeader("Иконка приложения"));
+        items.add(UItem.asCustom(iconsCell));
+        items.add(UItem.asShadow("Иконка на рабочем столе. Лаунчер может обновить её не сразу."));
+
+        items.add(UItem.asHeader("Наборы иконок"));
         items.add(restartCheck("Набор иконок «Solar»", ChickengramConfig::solarIcons, ChickengramConfig::setSolarIcons));
         items.add(UItem.asShadow("Заменяет иконки меню, кнопок и папок на набор «Solar», как в exteraGram."));
 

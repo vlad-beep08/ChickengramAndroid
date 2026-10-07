@@ -24,6 +24,7 @@ public class ChatsPreferencesActivity extends BasePreferencesFragment {
         DoubleTap.DOUBLE_TAP_ACTION_REPEAT_AS_COPY,
         DoubleTap.DOUBLE_TAP_ACTION_EDIT
     };
+    private static final String[] SWIPE_TITLES = { "Ответить", "Повторить", "Сохранить", "Переслать", "Перевести", "Копировать", "Отключить" };
     private static final String[] SEEK_TITLES = { "5 сек.", "10 сек.", "15 сек.", "30 сек." };
     private static final int[] SEEK_VALUES = { 5, 10, 15, 30 };
 
@@ -56,7 +57,9 @@ public class ChatsPreferencesActivity extends BasePreferencesFragment {
         items.add(UItem.asHeader("Жесты"));
         items.add(button(0, "Входящие сообщения", doubleTapTitle(NaConfig.INSTANCE.getDoubleTapActionIncoming().Int()), v -> chooseDoubleTap(false)));
         items.add(button(0, "Исходящие сообщения", doubleTapTitle(NaConfig.INSTANCE.getDoubleTapActionOutgoing().Int()), v -> chooseDoubleTap(true)));
-        items.add(UItem.asShadow("Действие по двойному нажатию на сообщение. Некоторые действия требуют прав администратора в чате или канале."));
+        final int swipe = Math.max(0, Math.min(SWIPE_TITLES.length - 1, ChickengramConfig.swipeAction()));
+        items.add(button(0, "Действие свайпом", SWIPE_TITLES[swipe], v -> choose("Действие свайпом", SWIPE_TITLES, swipe, ChickengramConfig::setSwipeAction)));
+        items.add(UItem.asShadow("Двойное нажатие и свайп влево по сообщению. Некоторые действия требуют прав администратора в чате или канале."));
 
         items.add(UItem.asHeader("Чаты"));
         items.add(check("Кнопка ЖОПА", ChickengramConfig::quickPhraseButton, ChickengramConfig::setQuickPhraseButton));
