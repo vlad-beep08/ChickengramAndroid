@@ -117,7 +117,7 @@ public class TranscribeButton {
 
         this.isOpen = false;
         this.shouldBeOpen = false;
-        premium = parent.getMessageObject() != null && UserConfig.getInstance(parent.getMessageObject().currentAccount).isPremium();
+        premium = parent.getMessageObject() != null && (UserConfig.getInstance(parent.getMessageObject().currentAccount).isPremium() || com.chickengram.ChickengramConfig.aiTranscribe());
 
         loadingFloat = new AnimatedFloat(parent, 250, CubicBezierInterpolator.EASE_OUT_QUINT);
         animatedDrawLock = new AnimatedFloat(parent, 250, CubicBezierInterpolator.EASE_OUT_QUINT);
@@ -689,6 +689,21 @@ public class TranscribeButton {
                     NotificationCenter.getInstance(account).postNotificationName(NotificationCenter.voiceTranscriptionUpdate, messageObject, null, null, (Boolean) true, (Boolean) true);
                 });
             } else {
+                if (com.chickengram.ChickengramConfig.aiTranscribe()) {
+                    if (transcribeOperationsByDialogPosition == null) {
+                        transcribeOperationsByDialogPosition = new HashMap<>();
+                    }
+                    transcribeOperationsByDialogPosition.put((Integer) reqInfoHash(messageObject), messageObject);
+                    com.chickengram.ai.AiTranscriber.transcribe(messageObject, text -> {
+                        final long duration = SystemClock.elapsedRealtime() - start;
+                        AndroidUtilities.runOnUIThread(() -> {
+                            TranscribeButton.openVideoTranscription(messageObject);
+                            messageObject.messageOwner.voiceTranscriptionOpen = true;
+                            finishTranscription(messageObject, 0, text);
+                        }, Math.max(0, minDuration - duration));
+                    });
+                    return;
+                }
                 if (BuildVars.LOGS_ENABLED) {
                     FileLog.d("sending Transcription request, msg_id=" + messageId + " dialog_id=" + dialogId);
                 }

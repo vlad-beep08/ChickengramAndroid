@@ -132,6 +132,79 @@ public final class AiClient {
         }
     }
 
+    public static boolean supportsTranscription() {
+        final int provider = NaConfig.INSTANCE.getLlmProvider().Int();
+        return provider == 0 || provider == 2 || provider >= PROVIDER_URLS.length;
+    }
+
+    public static String transcribe(java.io.File file) throws Exception {
+        final String key = apiKey();
+        if (TextUtils.isEmpty(key)) {
+            throw new Exception("Не указан ключ API. Откройте «ИИ-сервис» и вставьте ключ Groq или OpenAI.");
+        }
+        final int provider = NaConfig.INSTANCE.getLlmProvider().Int();
+        String url;
+        String model;
+        if (provider == 0) {
+            url = PROVIDER_URLS[0];
+            model = "whisper-1";
+        } else if (provider == 2) {
+            url = PROVIDER_URLS[2];
+            model = "whisper-large-v3-turbo";
+        } else if (provider >= PROVIDER_URLS.length) {
+            url = NaConfig.INSTANCE.getLlmApiUrl().String();
+            if (TextUtils.isEmpty(url)) {
+                url = PROVIDER_URLS[0];
+            }
+            while (url.endsWith("/")) {
+                url = url.substring(0, url.length() - 1);
+            }
+            url = stripSuffix(stripSuffix(stripSuffix(url, "/chat/completions"), "/messages"), "/responses");
+            model = "whisper-1";
+        } else {
+            throw new Exception("Расшифровка работает через Groq (бесплатно) или OpenAI. Выберите один из них в «ИИ-сервисе».");
+        }
+        final String boundary = "----Chickengram" + System.currentTimeMillis();
+        final HttpURLConnection connection = (HttpURLConnection) new URL(url + "/audio/transcriptions").openConnection();
+        try {
+            connection.setRequestMethod("POST");
+            connection.setConnectTimeout(30000);
+            connection.setReadTimeout(180000);
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Authorization", "Bearer " + key);
+            connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
+            final String name = file.getName().toLowerCase().endsWith(".mp4") ? "audio.mp4" : "audio.ogg";
+            final String mime = name.endsWith(".mp4") ? "video/mp4" : "audio/ogg";
+            try (OutputStream out = connection.getOutputStream()) {
+                writeField(out, boundary, "model", model);
+                writeField(out, boundary, "response_format", "json");
+                out.write(("--" + boundary + "\r\nContent-Disposition: form-data; name=\"file\"; filename=\"" + name + "\"\r\nContent-Type: " + mime + "\r\n\r\n").getBytes(StandardCharsets.UTF_8));
+                try (InputStream in = new java.io.FileInputStream(file)) {
+                    final byte[] buffer = new byte[16384];
+                    int read;
+                    while ((read = in.read(buffer)) > 0) {
+                        out.write(buffer, 0, read);
+                    }
+                }
+                out.write(("\r\n--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8));
+            }
+            final int code = connection.getResponseCode();
+            final InputStream stream = code >= 400 ? connection.getErrorStream() : connection.getInputStream();
+            final String text = stream == null ? "" : read(stream);
+            if (code >= 400) {
+                throw new Exception(describeError(code, text));
+            }
+            final String result = new JSONObject(text).optString("text", "").trim();
+            return result.isEmpty() ? "…" : result;
+        } finally {
+            connection.disconnect();
+        }
+    }
+
+    private static void writeField(OutputStream out, String boundary, String name, String value) throws Exception {
+        out.write(("--" + boundary + "\r\nContent-Disposition: form-data; name=\"" + name + "\"\r\n\r\n" + value + "\r\n").getBytes(StandardCharsets.UTF_8));
+    }
+
     private static String apiKey() {
         final String keys = NaConfig.INSTANCE.getLlmApiKeys().String();
         if (keys == null) {

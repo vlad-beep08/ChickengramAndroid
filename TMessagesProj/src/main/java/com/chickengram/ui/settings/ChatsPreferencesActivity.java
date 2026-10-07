@@ -159,9 +159,10 @@ public class ChatsPreferencesActivity extends BasePreferencesFragment {
             v -> NaConfig.INSTANCE.getSummarizeTextButton().setConfigInt(v ? SUMMARY_ALWAYS : SUMMARY_DEFAULT)));
         items.add(button(R.drawable.msg_bot, "ИИ-чат", null, v -> presentFragment(new AiChatSettingsActivity())));
         items.add(button(0, "ИИ-сервис", null, v -> presentFragment(new tw.nekomimi.nekogram.settings.NekoLLMSettingsActivity())));
+        items.add(check("Расшифровка голосовых через ИИ", ChickengramConfig::aiTranscribe, ChickengramConfig::setAiTranscribe));
         items.add(check("Переводить через ИИ", () -> NekoConfig.translationProvider.Int() == TRANSLATOR_LLM,
             v -> NekoConfig.translationProvider.setConfigInt(v ? TRANSLATOR_LLM : TRANSLATOR_GOOGLE)));
-        items.add(UItem.asShadow("Редактор (улучшить, сократить, исправить текст) и краткие сводки длинных сообщений — встроенные ИИ-функции Telegram. «ИИ-сервис» — подключение ChatGPT, Gemini, DeepSeek, Groq и других по своему ключу API; через него работает перевод через ИИ."));
+        items.add(UItem.asShadow("Редактор (улучшить, сократить, исправить текст) и краткие сводки длинных сообщений — встроенные ИИ-функции Telegram. «ИИ-сервис» — подключение ChatGPT, Gemini, DeepSeek, Groq и других по своему ключу API; через него работает перевод через ИИ. Расшифровка голосовых и кружков без Premium работает через Whisper у Groq (бесплатно) или OpenAI."));
 
         items.add(UItem.asHeader("Чаты"));
         items.add(check("Кнопка ЖОПА", ChickengramConfig::quickPhraseButton, ChickengramConfig::setQuickPhraseButton));

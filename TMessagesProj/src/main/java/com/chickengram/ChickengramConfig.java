@@ -61,6 +61,7 @@ public final class ChickengramConfig {
     private static boolean replyEmoji;
     private static boolean replyBackground;
     private static boolean suggestGhostStories;
+    private static boolean aiTranscribe;
 
     private ChickengramConfig() {
     }
@@ -104,6 +105,7 @@ public final class ChickengramConfig {
             replyEmoji = p.getBoolean("replyEmoji", true);
             replyBackground = p.getBoolean("replyBackground", true);
             suggestGhostStories = p.getBoolean("suggestGhostStories", true);
+            aiTranscribe = p.getBoolean("aiTranscribe", false);
             loaded = true;
         }
     }
@@ -381,6 +383,15 @@ public final class ChickengramConfig {
 
     public static void setSuggestGhostStories(boolean value) {
         suggestGhostStories = put("suggestGhostStories", value);
+    }
+
+    public static boolean aiTranscribe() {
+        ensureLoaded();
+        return aiTranscribe;
+    }
+
+    public static void setAiTranscribe(boolean value) {
+        aiTranscribe = put("aiTranscribe", value);
     }
 
     public static void reset() {
