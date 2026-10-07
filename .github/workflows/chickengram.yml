@@ -1,11 +1,16 @@
-name: Pull request
+name: Chickengram Android
 
 on:
-  pull_request:
-    types: [opened, reopened, synchronize]
+  workflow_dispatch:
+  push:
+    branches:
+      - main
     paths-ignore:
       - '**.md'
-      - '**.xml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   ffmpeg:
@@ -126,7 +131,7 @@ jobs:
       - name: Checkout Library
         if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          git submodule update
+          git submodule update --init
       - name: FFmpeg Cache
         uses: actions/cache@v6
         if: steps.cache.outputs.cache-hit != 'true'
@@ -216,11 +221,14 @@ jobs:
           echo "sdk.dir=${ANDROID_HOME}" >> local.properties
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
-      - name: Debug Build
+        with:
+          cache-read-only: false
+      - name: Signing Key
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > TMessagesProj/release.keystore
+      - name: Release Build
         run: |
           export LOCAL_PROPERTIES="${{ secrets.LOCAL_PROPERTIES }}"
-          export DEBUG_BUILD=true
-          sed -i 's/signingConfig signingConfigs.release//g' TMessagesProj/build.gradle
           ./gradlew TMessagesProj:assembleRelease --build-cache --no-configuration-cache
 
           APK=$(find TMessagesProj/build/outputs/apk -name '*arm64-v8a*.apk')
@@ -228,5 +236,5 @@ jobs:
           echo "APK=$APK" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v7
         with:
-          name: Debug
+          name: Chickengram-apk
           path: ${{ env.APK }}

@@ -54,6 +54,6 @@ public class AnalyticsHelper {
     }
 
     public static boolean getSentryStatus(Application application) {
-        return NkmrConfig.preferences.getBoolean("SentryAnalytics", true);
+        return false;
     }
 }
