@@ -30,6 +30,13 @@ public class ChatsPreferencesActivity extends BasePreferencesFragment {
 
     private boolean menuExpanded;
     private boolean repliesExpanded;
+    private boolean aiExpanded;
+
+    private static final int SUMMARY_DEFAULT = 0;
+    private static final int SUMMARY_DISABLE = 1;
+    private static final int SUMMARY_ALWAYS = 2;
+    private static final int TRANSLATOR_GOOGLE = 1;
+    private static final int TRANSLATOR_LLM = 10;
 
     private static final class MenuOption {
         final String title;
@@ -119,6 +126,40 @@ public class ChatsPreferencesActivity extends BasePreferencesFragment {
         final int swipe = Math.max(0, Math.min(SWIPE_TITLES.length - 1, ChickengramConfig.swipeAction()));
         items.add(button(0, "Действие свайпом", SWIPE_TITLES[swipe], v -> choose("Действие свайпом", SWIPE_TITLES, swipe, ChickengramConfig::setSwipeAction)));
         items.add(UItem.asShadow("Двойное нажатие и свайп влево по сообщению. Некоторые действия требуют прав администратора в чате или канале."));
+
+        items.add(UItem.asHeader("ИИ"));
+        final boolean aiEditor = !NaConfig.INSTANCE.getDisableAiEditor().Bool();
+        final boolean aiSummary = NaConfig.INSTANCE.getSummarizeTextButton().Int() != SUMMARY_DISABLE;
+        final int aiCount = (aiEditor ? 1 : 0) + (aiSummary ? 1 : 0);
+        final int aiId = action(v -> {
+            aiExpanded = !aiExpanded;
+            refresh();
+        });
+        items.add(UItem.asExpandableSwitch(aiId, "ИИ-функции", aiCount + "/2")
+            .setChecked(aiCount > 0)
+            .setCollapsed(!aiExpanded)
+            .setClickCallback(v -> {
+                final boolean value = aiCount < 2;
+                NaConfig.INSTANCE.getDisableAiEditor().setConfigBool(!value);
+                NaConfig.INSTANCE.getSummarizeTextButton().setConfigInt(value ? SUMMARY_DEFAULT : SUMMARY_DISABLE);
+                refresh();
+            }));
+        if (aiExpanded) {
+            items.add(UItem.asRoundCheckbox(action(v -> {
+                NaConfig.INSTANCE.getDisableAiEditor().setConfigBool(aiEditor);
+                refresh();
+            }), "Редактор").setChecked(aiEditor).setPad(1));
+            items.add(UItem.asRoundCheckbox(action(v -> {
+                NaConfig.INSTANCE.getSummarizeTextButton().setConfigInt(aiSummary ? SUMMARY_DISABLE : SUMMARY_DEFAULT);
+                refresh();
+            }), "Краткие сводки").setChecked(aiSummary).setPad(1));
+        }
+        items.add(check("Сводка для любого длинного сообщения", () -> NaConfig.INSTANCE.getSummarizeTextButton().Int() == SUMMARY_ALWAYS,
+            v -> NaConfig.INSTANCE.getSummarizeTextButton().setConfigInt(v ? SUMMARY_ALWAYS : SUMMARY_DEFAULT)));
+        items.add(button(0, "ИИ-сервис", null, v -> presentFragment(new tw.nekomimi.nekogram.settings.NekoLLMSettingsActivity())));
+        items.add(check("Переводить через ИИ", () -> NekoConfig.translationProvider.Int() == TRANSLATOR_LLM,
+            v -> NekoConfig.translationProvider.setConfigInt(v ? TRANSLATOR_LLM : TRANSLATOR_GOOGLE)));
+        items.add(UItem.asShadow("Редактор (улучшить, сократить, исправить текст) и краткие сводки длинных сообщений — встроенные ИИ-функции Telegram. «ИИ-сервис» — подключение ChatGPT, Gemini, DeepSeek, Groq и других по своему ключу API; через него работает перевод через ИИ."));
 
         items.add(UItem.asHeader("Чаты"));
         items.add(check("Кнопка ЖОПА", ChickengramConfig::quickPhraseButton, ChickengramConfig::setQuickPhraseButton));
