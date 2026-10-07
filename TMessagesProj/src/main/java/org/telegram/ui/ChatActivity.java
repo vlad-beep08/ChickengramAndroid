@@ -3169,6 +3169,7 @@ public class ChatActivity extends BaseFragment implements
             .add(NotificationCenter.didLoadSendAsPeers)
             .add(NotificationCenter.closeChatActivity)
             .add(NotificationCenter.messagesDeleted)
+            .add(NotificationCenter.chickengramMessagesDeleted)
             .add(NotificationCenter.historyCleared)
             .add(NotificationCenter.messageReceivedByServer)
             .add(NotificationCenter.messageReceivedByAck)
@@ -23208,6 +23209,24 @@ public class ChatActivity extends BaseFragment implements
             removeUnreadPlane(true);
             if (updated && chatAdapter != null) {
                 chatAdapter.notifyDataSetChanged(false);
+            }
+        } else if (id == NotificationCenter.chickengramMessagesDeleted) {
+            final long dialogKey = (Long) args[0];
+            final ArrayList<Integer> ids = (ArrayList<Integer>) args[1];
+            final boolean channel = ChatObject.isChannel(currentChat);
+            if (dialogKey != 0 ? dialogKey != dialog_id : channel) {
+                return;
+            }
+            boolean found = false;
+            for (Integer mid : ids) {
+                final MessageObject object = messagesDict[0].get(mid);
+                if (object != null) {
+                    object.forceUpdate = true;
+                    found = true;
+                }
+            }
+            if (found) {
+                updateVisibleRows();
             }
         } else if (id == NotificationCenter.messagesDeleted) {
             boolean scheduled = (Boolean) args[2];

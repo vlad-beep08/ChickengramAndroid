@@ -18636,6 +18636,9 @@ public class ChatMessageCell extends BaseCell implements SeekBar.SeekBarDelegate
         if (messageObject.messageOwner != null && messageObject.messageOwner.translated) {
             timeString = timeString + " | " + LocaleController.getString(R.string.Translate);
         }
+        if (com.chickengram.messages.DeletedMessages.isDeleted(currentAccount, messageObject)) {
+            timeString = com.chickengram.messages.DeletedMessages.LABEL + " " + timeString;
+        }
         if (messageObject.isAnyKindOfSticker() && NaConfig.INSTANCE.getRealHideTimeForSticker().Bool()) {
             timeString = "";
             drawEditedIcon = false;
