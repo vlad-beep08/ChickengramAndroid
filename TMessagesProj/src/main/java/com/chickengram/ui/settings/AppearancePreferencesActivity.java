@@ -57,6 +57,7 @@ public class AppearancePreferencesActivity extends BasePreferencesFragment {
         items.add(check("Заголовок по центру", () -> NaConfig.INSTANCE.getCenterActionBarTitle().Bool(), v -> NaConfig.INSTANCE.getCenterActionBarTitle().setConfigBool(v)));
         items.add(check("Скрыть истории", () -> NaConfig.INSTANCE.getDisableStories().Bool(), v -> NaConfig.INSTANCE.getDisableStories().setConfigBool(v)));
         items.add(check("Скрыть плавающую кнопку", () -> NaConfig.INSTANCE.getDisableDialogsFloatingButton().Bool(), v -> NaConfig.INSTANCE.getDisableDialogsFloatingButton().setConfigBool(v)));
+        items.add(restartCheck("Скрыть строку поиска", () -> NekoConfig.disablePullDownSearch.Bool(), NekoConfig.disablePullDownSearch::setConfigBool));
         items.add(check("Мини-аватарки отправителей", () -> NaConfig.INSTANCE.getShowUserIconsInChatsList().Bool(), v -> NaConfig.INSTANCE.getShowUserIconsInChatsList().setConfigBool(v)));
         items.add(UItem.asShadow("Падающий снег появится в верхней панели, боковом меню и на фоне чатов."));
 
@@ -72,6 +73,13 @@ public class AppearancePreferencesActivity extends BasePreferencesFragment {
             NekoConfig.tabsTitleType.setConfigInt(TAB_TITLE_VALUES[index]);
             getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
         })));
+        final String[] counterTitles = { "Все чаты", "Без отключённых", "Скрыть" };
+        final int counterIndex = NaConfig.INSTANCE.getIgnoreFolderCount().Bool() ? 2 : NekoConfig.ignoreMutedCount.Bool() ? 1 : 0;
+        items.add(button(0, "Счётчик уведомлений", counterTitles[counterIndex], v -> choose("Счётчик уведомлений", counterTitles, counterIndex, index -> {
+            NaConfig.INSTANCE.getIgnoreFolderCount().setConfigBool(index == 2);
+            NekoConfig.ignoreMutedCount.setConfigBool(index == 1);
+            getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
+        })));
         items.add(check("Скрыть вкладку «Все чаты»", () -> NekoConfig.hideAllTab.Bool(), v -> {
             NekoConfig.hideAllTab.setConfigBool(v);
             getNotificationCenter().postNotificationName(NotificationCenter.dialogFiltersUpdated);
@@ -85,8 +93,9 @@ public class AppearancePreferencesActivity extends BasePreferencesFragment {
         items.add(UItem.asCustom(iconsCell));
         items.add(UItem.asShadow("Иконка на рабочем столе. Лаунчер может обновить её не сразу."));
 
+        items.add(button(R.drawable.msg_list, "Навигация в приложении", null, v -> presentFragment(new NavigationPreferencesActivity())));
         items.add(button(R.drawable.msg_customize, "Pill Stack", null, v -> presentFragment(new PillStackPreferencesActivity())));
-        items.add(UItem.asShadow("Интерактивные кнопки в поле поиска на главном экране: призрак, Избранное, Архив, ИИ-чат."));
+        items.add(UItem.asShadow("Навигация — пункты меню главного экрана. Pill Stack — интерактивные кнопки в поле поиска: призрак, Избранное, Архив, ИИ-чат."));
 
         items.add(UItem.asHeader("Наборы иконок"));
         items.add(restartCheck("Набор иконок «Solar»", ChickengramConfig::solarIcons, ChickengramConfig::setSolarIcons));
