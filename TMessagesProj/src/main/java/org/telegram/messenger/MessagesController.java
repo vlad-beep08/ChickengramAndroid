@@ -21354,7 +21354,7 @@ public class MessagesController extends BaseController implements NotificationCe
         LongSparseArray<ArrayList<Integer>> markContentAsReadMessagesFinal = markContentAsReadMessages;
         SparseIntArray markAsReadEncryptedFinal = markAsReadEncrypted;
         if (deletedMessages != null && com.chickengram.messages.DeletedMessages.keepDeleted()) {
-            com.chickengram.messages.DeletedMessages.remember(currentAccount, deletedMessages);
+            com.chickengram.messages.DeletedMessages.remember(currentAccount, deletedMessages, getMessagesStorage());
             deletedMessages = null;
         }
         LongSparseArray<ArrayList<Integer>> deletedMessagesFinal = deletedMessages;

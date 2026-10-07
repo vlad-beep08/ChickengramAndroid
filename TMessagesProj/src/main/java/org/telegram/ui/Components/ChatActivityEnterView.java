@@ -2844,6 +2844,7 @@ public class ChatActivityEnterView extends FrameLayout implements
             quickPhraseButton = new com.chickengram.ui.QuickPhraseButton(context);
             quickPhraseButton.setOnClickListener(v -> sendQuickPhrase());
             ScaleStateListAnimator.apply(quickPhraseButton);
+            quickPhraseButton.setVisibility(com.chickengram.ChickengramConfig.quickPhraseButton() ? VISIBLE : GONE);
             attachLayout.addView(quickPhraseButton, 0, LayoutHelper.createLinear(DEFAULT_HEIGHT, DEFAULT_HEIGHT));
 
             attachButton = new ImageView(context) {

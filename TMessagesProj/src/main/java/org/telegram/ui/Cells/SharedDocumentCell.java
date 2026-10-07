@@ -518,7 +518,11 @@ public class SharedDocumentCell extends FrameLayout implements DownloadControlle
                     .append(fromName));
             rightDateTextView.setText(LocaleController.stringForMessageListDate(message.messageOwner.date));
         } else {
-            dateTextView.setText(String.format("%s, %s", fileSize, LocaleController.formatString("formatDateAtTime", R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDay().format(new Date(date)))));
+            String dateText = String.format("%s, %s", fileSize, LocaleController.formatString("formatDateAtTime", R.string.formatDateAtTime, LocaleController.getInstance().getFormatterYear().format(new Date(date)), LocaleController.getInstance().getFormatterDay().format(new Date(date))));
+            if (com.chickengram.messages.DeletedMessages.isDeleted(currentAccount, message)) {
+                dateText = com.chickengram.messages.DeletedMessages.LABEL + " · " + dateText;
+            }
+            dateTextView.setText(dateText);
         }
     }
 

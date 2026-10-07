@@ -673,6 +673,9 @@ public class SharedPhotoVideoCell2 extends FrameLayout {
         }
         if (!PhotoViewer.isShowingImage(currentMessageObject)) {
             imageReceiver.draw(canvas);
+            if (com.chickengram.messages.DeletedMessages.isDeleted(currentAccount, currentMessageObject)) {
+                com.chickengram.messages.DeletedMessages.drawBadge(canvas, imageReceiver.getImageX(), imageReceiver.getImageY());
+            }
             if (currentMessageObject != null && currentMessageObject.hasMediaSpoilers() && !currentMessageObject.isMediaSpoilersRevealedInSharedMedia) {
                 canvas.save();
                 canvas.clipRect(leftpadding, toppadding, leftpadding + imageWidth - rightpadding, toppadding + imageHeight - bottompadding);

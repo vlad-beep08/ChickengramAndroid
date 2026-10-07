@@ -59,6 +59,7 @@ public class NekoSettingsActivity extends BaseNekoSettingsActivity {
     ));
 
     private int categoriesRow;
+    private int chickengramRow;
     private int generalRow;
     private int accountRow;
     private int chatRow;
@@ -95,7 +96,9 @@ public class NekoSettingsActivity extends BaseNekoSettingsActivity {
 
     @Override
     protected void onItemClick(View view, int position, float x, float y) {
-        if (position == generalRow) {
+        if (position == chickengramRow) {
+            presentFragment(new com.chickengram.ui.ChickengramSettingsActivity());
+        } else if (position == generalRow) {
             presentFragment(new NekoGeneralSettingsActivity());
         } else if (position == accountRow) {
             presentFragment(new NekoAccountSettingsActivity());
@@ -159,6 +162,7 @@ public class NekoSettingsActivity extends BaseNekoSettingsActivity {
         super.updateRows();
 
         categoriesRow = addRow("categories");
+        chickengramRow = addRow("chickengram");
         generalRow = addRow("general");
         accountRow = addRow("account");
         chatRow = addRow("chat");
@@ -232,7 +236,9 @@ public class NekoSettingsActivity extends BaseNekoSettingsActivity {
                 }
                 case TYPE_TEXT: {
                     TextCell textCell = (TextCell) holder.itemView;
-                    if (position == generalRow) {
+                    if (position == chickengramRow) {
+                        textCell.setTextAndIcon("Чикенграм", R.drawable.msg_fave, divider);
+                    } else if (position == generalRow) {
                         textCell.setTextAndIcon(LocaleController.getString(R.string.General), R.drawable.msg_media, divider);
                     } else if (position == accountRow) {
                         textCell.setTextAndIcon(LocaleController.getString(R.string.Account), R.drawable.msg_contacts, divider);
