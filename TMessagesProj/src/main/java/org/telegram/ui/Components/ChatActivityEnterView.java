@@ -6488,6 +6488,10 @@ public class ChatActivityEnterView extends FrameLayout implements
                 if (innerTextChange == 1) {
                     return;
                 }
+                if (count > before && !ignoreTextChange && messageEditText != null && messageEditText.hasFocus() && com.chickengram.ChickengramConfig.typingNuts()) {
+                    final EditTextCaption nutsField = messageEditText;
+                    nutsField.post(() -> com.chickengram.ui.TypingNuts.spawn(nutsField));
+                }
                 if (sendByEnter && !ctrlPressed && !shiftPressed && !ignoreTextChange && !isPaste && editingMessageObject == null && count > before && charSequence.length() > 0 && charSequence.length() == start + count && charSequence.charAt(charSequence.length() - 1) == '\n') {
                     nextChangeIsSend = true;
                 }

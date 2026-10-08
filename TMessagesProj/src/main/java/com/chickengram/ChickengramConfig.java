@@ -45,6 +45,7 @@ public final class ChickengramConfig {
     private static boolean staticZoom;
     private static boolean alwaysHd;
     private static boolean calcResults;
+    private static boolean typingNuts;
     private static boolean relativeOnline;
     private static int downloadBoost;
     private static boolean uploadBoost;
@@ -96,6 +97,7 @@ public final class ChickengramConfig {
             staticZoom = p.getBoolean("staticZoom", false);
             alwaysHd = p.getBoolean("alwaysHd", false);
             calcResults = p.getBoolean("calcResults", false);
+        typingNuts = p.getBoolean("typingNuts", true);
             relativeOnline = p.getBoolean("relativeOnline", false);
             downloadBoost = p.getInt("downloadBoost", 0);
             uploadBoost = p.getBoolean("uploadBoost", false);
@@ -248,6 +250,15 @@ public final class ChickengramConfig {
 
     public static void setCalcResults(boolean value) {
         calcResults = put("calcResults", value);
+    }
+
+    public static boolean typingNuts() {
+        ensureLoaded();
+        return typingNuts;
+    }
+
+    public static void setTypingNuts(boolean value) {
+        typingNuts = put("typingNuts", value);
     }
 
     public static boolean relativeOnline() {

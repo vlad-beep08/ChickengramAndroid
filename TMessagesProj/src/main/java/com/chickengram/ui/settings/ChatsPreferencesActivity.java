@@ -166,6 +166,7 @@ public class ChatsPreferencesActivity extends BasePreferencesFragment {
 
         items.add(UItem.asHeader("Чаты"));
         items.add(check("Кнопка ЖОПА", ChickengramConfig::quickPhraseButton, ChickengramConfig::setQuickPhraseButton));
+        items.add(check("Орешки васаби при печати", ChickengramConfig::typingNuts, ChickengramConfig::setTypingNuts));
         items.add(check("Скрыть кнопку «Звук» в каналах", () -> NaConfig.INSTANCE.getDisableChannelMuteButton().Bool(), v -> NaConfig.INSTANCE.getDisableChannelMuteButton().setConfigBool(v)));
         items.add(check("Быстрые админ-действия", () -> NekoConfig.showAdminActions.Bool(), NekoConfig.showAdminActions::setConfigBool));
         items.add(check("Быстрый переход свайпом", () -> !NekoConfig.disableSwipeToNext.Bool(), v -> NekoConfig.disableSwipeToNext.setConfigBool(!v)));
@@ -174,7 +175,7 @@ public class ChatsPreferencesActivity extends BasePreferencesFragment {
         items.add(check("Запятая после упоминания", () -> NaConfig.INSTANCE.getAddCommaAfterMention().Bool(), v -> NaConfig.INSTANCE.getAddCommaAfterMention().setConfigBool(v)));
         items.add(check("Результаты вычислений", ChickengramConfig::calcResults, ChickengramConfig::setCalcResults));
         items.add(check("Скрыть кнопку «Отправить как»", () -> NekoConfig.hideSendAsChannel.Bool(), NekoConfig.hideSendAsChannel::setConfigBool));
-        items.add(UItem.asShadow("Результаты вычислений: напишите «2+2=» и пробел — результат подставится сам. Кнопка ЖОПА появится у поля ввода при следующем открытии чата."));
+        items.add(UItem.asShadow("Результаты вычислений: напишите «2+2=» и пробел — результат подставится сам. Кнопка ЖОПА появится у поля ввода при следующем открытии чата. Орешки васаби вылетают из курсора при наборе, как в Чикенграме для Windows; не работают, если в системе отключена анимация."));
 
         items.add(UItem.asHeader("Сообщения"));
         items.add(check("Широкие посты в каналах", ChickengramConfig::widePosts, ChickengramConfig::setWidePosts));
