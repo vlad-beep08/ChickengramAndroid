@@ -1088,7 +1088,12 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
             ((ClipRoundedDrawable) drawable).setRadii(r[0], r[1], r[2], r[3]);
         } else if ((hasRoundRadius() || gradientShader != null) && (drawable instanceof BitmapDrawable || drawable instanceof AvatarDrawable)) {
             if (drawable instanceof AvatarDrawable) {
-                ((AvatarDrawable) drawable).setRoundRadius(r[0]);
+                int radius = r[0];
+                final int corners = com.chickengram.ChickengramConfig.avatarCorners();
+                if (!chickengramAvatar && corners < com.chickengram.ChickengramConfig.MAX_AVATAR_CORNERS) {
+                    radius = Math.max(1, radius * corners / com.chickengram.ChickengramConfig.MAX_AVATAR_CORNERS);
+                }
+                ((AvatarDrawable) drawable).setRoundRadius(radius);
             } else {
                 BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
                 if (bitmapDrawable instanceof RLottieDrawable) {

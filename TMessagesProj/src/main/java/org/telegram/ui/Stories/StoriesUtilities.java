@@ -132,7 +132,7 @@ public class StoriesUtilities {
         int state;
         int unreadState = 0;
         boolean showProgress = storiesController.isLoading(dialogId);
-        boolean isForum = ChatObject.isForum(UserConfig.selectedAccount, dialogId) && !params.isDialogStoriesCell;
+        boolean isForum = (ChatObject.isForum(UserConfig.selectedAccount, dialogId) || chickengramShaped()) && !params.isDialogStoriesCell;
         if (params.drawHiddenStoriesAsSegments) {
             hasStories = storiesController.hasHiddenStories();
         }
@@ -672,7 +672,7 @@ public class StoriesUtilities {
         if (isForum) {
             forumRect.set(rectTmp);
             forumRect.inset(dp(0.5f), dp(0.5f));
-            canvas.drawRoundRect(forumRect, dp(18), dp(18), paint);
+            final float forumRadius = chickengramShaped() ? forumRect.height() / 2f * chickengramScale() : dp(18);
             return;
         }
         if (params.progressToArc == 0) {
@@ -689,7 +689,7 @@ public class StoriesUtilities {
 
     private static void drawSegment(Canvas canvas, RectF rectTmp, Paint paint, float startAngle, float endAngle, AvatarStoryParams params, boolean isForum) {
         if (isForum) {
-            float r = rectTmp.height() * 0.32f;
+            float r = chickengramShaped() ? rectTmp.height() * 0.5f * chickengramScale() : rectTmp.height() * 0.32f;
             float rotateAngle = (((int)(startAngle)) / 90) * 90 + 90;
             float pathAngleStart = -199 + rotateAngle;
             float percentFrom = (startAngle - pathAngleStart) / 360;

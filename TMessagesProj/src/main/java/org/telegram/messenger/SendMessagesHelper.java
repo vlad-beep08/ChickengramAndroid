@@ -3086,6 +3086,7 @@ public class SendMessagesHelper extends BaseController implements NotificationCe
             if (!retry) {
                 if (messageObject.editingMessage != null) {
                     String oldMessge = newMsg.message;
+                    com.chickengram.messages.EditHistory.rememberOwn(currentAccount, newMsg, oldMessge, messageObject.editingMessage.toString());
                     newMsg.message = messageObject.editingMessage.toString();
                     messageObject.caption = null;
                     if (type == 1) {

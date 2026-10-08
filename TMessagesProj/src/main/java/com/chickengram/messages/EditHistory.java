@@ -14,6 +14,7 @@ import org.telegram.messenger.ApplicationLoader;
 import org.telegram.messenger.FileLog;
 import org.telegram.messenger.MessageObject;
 import org.telegram.messenger.MessagesStorage;
+import org.telegram.messenger.Utilities;
 import org.telegram.tgnet.NativeByteBuffer;
 import org.telegram.tgnet.TLRPC;
 
@@ -77,22 +78,38 @@ public final class EditHistory {
             if (old == null || TextUtils.isEmpty(old.message) || TextUtils.equals(old.message, newText)) {
                 return;
             }
-            final int date = old.edit_date != 0 ? old.edit_date : old.date;
-            synchronized (lock) {
-                try {
-                    final ContentValues values = new ContentValues();
-                    values.put("account", account);
-                    values.put("dialog", dialog);
-                    values.put("mid", mid);
-                    values.put("date", date);
-                    values.put("text", old.message);
-                    helper().getWritableDatabase().insert(TABLE, null, values);
-                    load(account).add(key(dialog, mid));
-                } catch (Exception e) {
-                    FileLog.e(e);
-                }
-            }
+            store(account, dialog, mid, old.edit_date != 0 ? old.edit_date : old.date, old.message);
         });
+    }
+
+    public static void rememberOwn(int account, TLRPC.Message message, String oldText, String newText) {
+        if (message == null || !ChickengramConfig.saveEditHistory() || TextUtils.isEmpty(oldText) || TextUtils.equals(oldText, newText)) {
+            return;
+        }
+        final long dialog = MessageObject.getDialogId(message);
+        final int mid = message.id;
+        if (dialog == 0 || mid <= 0) {
+            return;
+        }
+        final int date = message.edit_date != 0 ? message.edit_date : message.date;
+        Utilities.globalQueue.postRunnable(() -> store(account, dialog, mid, date, oldText));
+    }
+
+    private static void store(int account, long dialog, int mid, int date, String text) {
+        synchronized (lock) {
+            try {
+                final ContentValues values = new ContentValues();
+                values.put("account", account);
+                values.put("dialog", dialog);
+                values.put("mid", mid);
+                values.put("date", date);
+                values.put("text", text);
+                helper().getWritableDatabase().insert(TABLE, null, values);
+                load(account).add(key(dialog, mid));
+            } catch (Exception e) {
+                FileLog.e(e);
+            }
+        }
     }
 
     public static boolean has(int account, MessageObject object) {
