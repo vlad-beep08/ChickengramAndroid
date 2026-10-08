@@ -668,11 +668,20 @@ public class StoriesUtilities {
 
     private static final RectF forumRect = new RectF();
 
+    private static boolean chickengramShaped() {
+        return com.chickengram.ChickengramConfig.avatarCorners() < com.chickengram.ChickengramConfig.MAX_AVATAR_CORNERS;
+    }
+
+    private static float chickengramScale() {
+        return com.chickengram.ChickengramConfig.avatarCorners() / (float) com.chickengram.ChickengramConfig.MAX_AVATAR_CORNERS;
+    }
+
     private static void drawCircleInternal(Canvas canvas, View view, AvatarStoryParams params, Paint paint, boolean isForum) {
         if (isForum) {
             forumRect.set(rectTmp);
             forumRect.inset(dp(0.5f), dp(0.5f));
             final float forumRadius = chickengramShaped() ? forumRect.height() / 2f * chickengramScale() : dp(18);
+            canvas.drawRoundRect(forumRect, forumRadius, forumRadius, paint);
             return;
         }
         if (params.progressToArc == 0) {

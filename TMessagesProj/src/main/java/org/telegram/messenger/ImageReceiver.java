@@ -328,6 +328,7 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
     private final int[] roundRadius = new int[4];
     private final int[] chickengramRequestedRadius = new int[4];
     private boolean chickengramAvatar;
+    private int chickengramHalfSize;
     private int[] emptyRoundRadius;
     private boolean isRoundRect = true;
     private Object mark;
@@ -2407,6 +2408,7 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
         imageY = y;
         imageW = width;
         imageH = height;
+        chickengramCheckSize();
     }
 
     public void setImageCoords(Rect bounds) {
@@ -2415,6 +2417,7 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
             imageY = bounds.top;
             imageW = bounds.width();
             imageH = bounds.height();
+            chickengramCheckSize();
         }
     }
 
@@ -2424,6 +2427,24 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
             imageY = bounds.top;
             imageW = bounds.width();
             imageH = bounds.height();
+            chickengramCheckSize();
+        }
+    }
+
+    private void chickengramCheckSize() {
+        if (!chickengramAvatar || com.chickengram.ChickengramConfig.avatarCorners() >= com.chickengram.ChickengramConfig.MAX_AVATAR_CORNERS) {
+            return;
+        }
+        final int half = (int) (Math.min(imageW, imageH) / 2);
+        if (half <= 0 || half == chickengramHalfSize) {
+            return;
+        }
+        chickengramHalfSize = half;
+        for (int radius : chickengramRequestedRadius) {
+            if (radius > half) {
+                setRoundRadius(chickengramRequestedRadius.clone());
+                return;
+            }
         }
     }
 
@@ -2558,7 +2579,8 @@ public class ImageReceiver implements NotificationCenter.NotificationCenterDeleg
             if (corners < com.chickengram.ChickengramConfig.MAX_AVATAR_CORNERS) {
                 value = value.clone();
                 for (int i = 0; i < value.length; i++) {
-                    value[i] = Math.max(1, value[i] * corners / com.chickengram.ChickengramConfig.MAX_AVATAR_CORNERS);
+                    final int base = chickengramHalfSize > 0 ? Math.min(value[i], chickengramHalfSize) : value[i];
+                    value[i] = Math.max(1, base * corners / com.chickengram.ChickengramConfig.MAX_AVATAR_CORNERS);
                 }
             }
         }

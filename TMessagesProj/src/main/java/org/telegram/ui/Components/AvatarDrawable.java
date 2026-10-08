@@ -615,7 +615,14 @@ public class AvatarDrawable extends Drawable {
         if (avatarType == AVATAR_TYPE_ARCHIVED) {
             if (archivedAvatarProgress != 0) {
                 backgroundPaint.setColor(ColorUtils.setAlphaComponent(getThemedColor(Theme.key_avatar_backgroundArchived), alpha));
-                canvas.drawCircle(size / 2.0f, size / 2.0f, size / 2.0f * archivedAvatarProgress, backgroundPaint);
+                if (roundRadius > 0 || com.chickengram.ChickengramConfig.avatarCorners() < com.chickengram.ChickengramConfig.MAX_AVATAR_CORNERS) {
+                    final float half = size / 2.0f * archivedAvatarProgress;
+                    final float radius = roundRadius > 0 ? roundRadius * archivedAvatarProgress : half * com.chickengram.ChickengramConfig.avatarCorners() / com.chickengram.ChickengramConfig.MAX_AVATAR_CORNERS;
+                    AndroidUtilities.rectTmp.set(size / 2.0f - half, size / 2.0f - half, size / 2.0f + half, size / 2.0f + half);
+                    canvas.drawRoundRect(AndroidUtilities.rectTmp, radius, radius, backgroundPaint);
+                } else {
+                    canvas.drawCircle(size / 2.0f, size / 2.0f, size / 2.0f * archivedAvatarProgress, backgroundPaint);
+                }
                 if (Theme.dialogs_archiveAvatarDrawableRecolored) {
                     Theme.dialogs_archiveAvatarDrawable.beginApplyLayerColors();
                     Theme.dialogs_archiveAvatarDrawable.setLayerColor("Arrow1", Theme.getNonAnimatedColor(Theme.key_avatar_backgroundArchived));
