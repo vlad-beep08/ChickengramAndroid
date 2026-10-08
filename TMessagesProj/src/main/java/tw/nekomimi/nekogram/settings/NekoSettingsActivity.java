@@ -203,13 +203,13 @@ public class NekoSettingsActivity extends BaseNekoSettingsActivity {
                 case TYPE_SETTINGS: {
                     TextSettingsCell textCell = (TextSettingsCell) holder.itemView;
                     if (position == channelRow) {
-                        textCell.setTextAndValue(LocaleController.getString(R.string.OfficialChannel), "@" + channelUsername, divider);
+                        textCell.setTextAndValue("Канал Nagram", "@" + channelUsername, divider);
                     } else if (position == channelTipsRow) {
-                        textCell.setTextAndValue(LocaleController.getString(R.string.TipsChannel), "@" + channelUsernameTips, divider);
+                        textCell.setTextAndValue("Советы по Nagram", "@" + channelUsernameTips, divider);
                     } else if (position == sourceCodeRow) {
-                        textCell.setText(LocaleController.getString(R.string.SourceCode), divider);
+                        textCell.setText("Исходный код Nagram", divider);
                     } else if (position == translationRow) {
-                        textCell.setText(LocaleController.getString(R.string.TransSite), divider);
+                        textCell.setText("Переводы Nagram", divider);
                     } else if (position == datacenterRow) {
                         textCell.setText(LocaleController.getString(R.string.DatacenterStatus), divider);
                     } else if (position == networkLogRow) {
@@ -228,7 +228,7 @@ public class NekoSettingsActivity extends BaseNekoSettingsActivity {
                     if (position == categoriesRow) {
                         headerCell.setText(LocaleController.getString(R.string.Categories));
                     } else if (position == aboutRow) {
-                        headerCell.setText(LocaleController.getString(R.string.About));
+                        headerCell.setText("Nagram — основа Чикенграма");
                     } else if (position == settingsRow) {
                         headerCell.setText(LocaleController.getString(R.string.N_Config));
                     }

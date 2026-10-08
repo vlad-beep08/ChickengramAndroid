@@ -21,7 +21,7 @@ public class ChickengramPreferencesActivity extends BasePreferencesFragment {
         if (header == null) {
             header = new PreferencesHeaderView(getContext(), R.mipmap.ic_launcher_nagram_round, 0, 0, "Чикенграм", BuildVars.BUILD_VERSION_STRING);
         }
-        items.add(UItem.asCustom(header));
+        items.add(UItem.asFullyCustom(header));
         items.add(UItem.asHeader("Категории"));
         items.add(button(R.drawable.msg_settings, "Основные", null, v -> presentFragment(new GeneralPreferencesActivity())));
         items.add(button(R.drawable.msg_palette, "Внешний вид", null, v -> presentFragment(new AppearancePreferencesActivity())));
@@ -31,7 +31,7 @@ public class ChickengramPreferencesActivity extends BasePreferencesFragment {
         items.add(UItem.asShadow(null));
         items.add(UItem.asHeader("Ссылки"));
         items.add(button(R.drawable.msg_link, "Исходный код", "GitHub", v -> Browser.openUrl(getParentActivity(), "https://github.com/vlad-beep08/ChickengramAndroid")));
-        items.add(button(R.drawable.ghost, "Призрак и шпион", null, v -> presentFragment(new SpyPreferencesActivity())));
+        items.add(button(R.drawable.chickengram_ghost_outline, "Призрак и шпион", null, v -> presentFragment(new SpyPreferencesActivity())));
         items.add(UItem.asShadow(null));
     }
 }

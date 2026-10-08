@@ -42,13 +42,15 @@ public class AppearancePreferencesActivity extends BasePreferencesFragment {
             avatarPreview = new AvatarCornersPreview(getContext());
         }
         items.add(UItem.asHeader("Закругление аватарок"));
-        items.add(UItem.asIntSlideView(1, 0, ChickengramConfig.avatarCorners(), ChickengramConfig.MAX_AVATAR_CORNERS,
-            value -> value == 0 ? "Квадрат" : value == ChickengramConfig.MAX_AVATAR_CORNERS ? "Круг" : value + " dp",
+        final UItem cornersSlider = UItem.asIntSlideView(1, 0, ChickengramConfig.avatarCorners(), ChickengramConfig.MAX_AVATAR_CORNERS,
+            value -> value + " dp",
             value -> {
                 ChickengramConfig.setAvatarCorners(value);
                 avatarPreview.invalidate();
                 rebuildOnClose = true;
-            }));
+            });
+        ((org.telegram.ui.Cells.SlideIntChooseView.Options) cornersSlider.object).toString = (type, value) -> type < 0 ? "Квадрат" : type > 0 ? "Круг" : value + " dp";
+        items.add(cornersSlider);
         items.add(UItem.asCustom(avatarPreview));
         items.add(UItem.asShadow("Форма аватарок во всём приложении: от квадрата до круга."));
 

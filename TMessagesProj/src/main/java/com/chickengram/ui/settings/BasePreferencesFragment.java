@@ -1,5 +1,6 @@
 package com.chickengram.ui.settings;
 
+import android.content.Context;
 import android.util.SparseArray;
 import android.view.View;
 
@@ -37,6 +38,14 @@ public abstract class BasePreferencesFragment extends UniversalFragment {
     private int nextId;
 
     protected abstract void fill(ArrayList<UItem> items);
+
+    @Override
+    public View createView(Context context) {
+        final View view = super.createView(context);
+        listView.setSections();
+        actionBar.setAdaptiveBackground(listView);
+        return view;
+    }
 
     @Override
     protected final void fillItems(ArrayList<UItem> items, UniversalAdapter adapter) {
@@ -96,18 +105,10 @@ public abstract class BasePreferencesFragment extends UniversalFragment {
         if (getParentActivity() == null) {
             return;
         }
-        final CharSequence[] labels = new CharSequence[options.length];
-        for (int i = 0; i < options.length; i++) {
-            labels[i] = i == selected ? options[i] + "  ✓" : options[i];
-        }
-        final AlertDialog.Builder builder = new AlertDialog.Builder(getParentActivity(), getResourceProvider());
-        builder.setTitle(title);
-        builder.setItems(labels, (dialog, which) -> {
+        showDialog(org.telegram.ui.Components.AlertsCreator.createSingleChoiceDialog(getParentActivity(), options, title, selected, (dialog, which) -> {
             choice.choose(which);
             refresh();
-        });
-        builder.setNegativeButton("Отмена", null);
-        showDialog(builder.create());
+        }));
     }
 
     protected void confirm(String title, String message, String button, Runnable action) {

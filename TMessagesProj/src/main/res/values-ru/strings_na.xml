@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="N_Config">Расширенные настройки</string>
+    <string name="DatacenterStatus">Статус дата-центров</string>
+    <string name="PasscodeNeko">Код-пароль</string>
 </resources>
