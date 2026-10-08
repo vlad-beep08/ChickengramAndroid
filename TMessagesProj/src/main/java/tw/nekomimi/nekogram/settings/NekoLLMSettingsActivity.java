@@ -115,6 +115,10 @@ public class NekoLLMSettingsActivity extends BaseNekoXSettingsActivity {
         cellGroup.callBackSettingsChanged = (key, newValue) -> {
             if (key.equals(NaConfig.INSTANCE.getLlmProvider().getKey()) || key.equals(NaConfig.INSTANCE.getLlmApiFormat().getKey())) {
                 updateRows();
+                final int modelPosition = cellGroup.rows.indexOf(llmModelRow);
+                if (modelPosition >= 0) {
+                    listAdapter.notifyItemChanged(modelPosition);
+                }
             }
         };
 
