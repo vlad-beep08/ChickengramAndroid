@@ -114,6 +114,10 @@ import org.telegram.ui.Components.ImageUpdater;
 import org.telegram.ui.Components.InstantCameraView;
 import org.telegram.ui.Components.ItemOptions;
 import org.telegram.ui.Components.LayoutHelper;
+import org.telegram.ui.Components.Premium.PremiumFeatureBottomSheet;
+import org.telegram.ui.Components.Premium.LimitReachedBottomSheet;
+import org.telegram.messenger.DialogObject;
+import org.telegram.tgnet.tl.TL_stars;
 import org.telegram.ui.Components.LinkSpanDrawable;
 import org.telegram.ui.Components.Paint.PersistColorPalette;
 import org.telegram.ui.Components.Premium.boosts.UserSelectorBottomSheet;
@@ -186,6 +190,12 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
     private ImageLocation uploadingImageLocation;
 
     private FrameLayout topView;
+    private com.chickengram.ui.SettingsCover cover;
+    private com.chickengram.ui.SettingsCover.StatusView statusView;
+    private ImageView qrButton;
+    private ImageView coverSearchButton;
+    private TextView editButton;
+    private ActionBarMenu actionBarMenu;
     private FrameLayout avatarContainer;
     private AvatarDrawable avatarDrawable;
     private BackupImageView avatarView;
@@ -321,8 +331,10 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         actionBar.setOccupyStatusBar(true);
         actionBar.setBackgroundColor(Color.TRANSPARENT);
         actionBar.setBackground(null);
+        actionBar.setInterceptTouches(false);
 
         final ActionBarMenu menu = actionBar.createMenu();
+        actionBarMenu = menu;
         searchItem = menu.addItem(0, R.drawable.outline_header_search, resourceProvider).setIsSearchField(true).setActionBarMenuItemSearchListener(new ActionBarMenuItem.ActionBarMenuItemSearchListener() {
 
             @Override
@@ -368,7 +380,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
             listView.getItemAnimator().setMoveDuration(220);
             ((DefaultItemAnimator) listView.getItemAnimator()).setDelayAnimations(true);
         }
-        listView.setPadding(0, AndroidUtilities.statusBarHeight + dp(12), 0, AndroidUtilities.navigationBarHeight + additionNavigationBarHeight);
+        listView.setPadding(0, 0, 0, AndroidUtilities.navigationBarHeight + additionNavigationBarHeight);
         listView.setClipToPadding(false);
         listView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -409,30 +421,19 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         imageUpdater.parentFragment = this;
         imageUpdater.setDelegate(this);
 
-        topView = new FrameLayout(context);
+        topView = cover = new com.chickengram.ui.SettingsCover(context, currentAccount, resourceProvider);
+        cover.setTopInset(AndroidUtilities.statusBarHeight);
 
         avatarContainer = new FrameLayout(context);
-        topView.addView(avatarContainer, LayoutHelper.createFrame(120, 120, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 0, 23 - 12, 0, 0));
-        avatarContainer.setOnClickListener(v -> {
-            TLRPC.User user = MessagesController.getInstance(currentAccount).getUser(UserConfig.getInstance(currentAccount).getClientUserId());
-            if (user == null) {
-                user = UserConfig.getInstance(currentAccount).getCurrentUser();
-            }
-            if (user == null) {
-                return;
-            }
-            imageUpdater.openMenu(user.photo != null && user.photo.photo_big != null && !(user.photo instanceof TLRPC.TL_userProfilePhotoEmpty), () -> {
-                MessagesController.getInstance(currentAccount).deleteUserPhoto(null);
-            }, dialog -> {
-
-            }, 0);
-        });
+        topView.addView(avatarContainer, LayoutHelper.createFrame(100, 100, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 0, 22, 0, 0));
+        avatarContainer.setOnClickListener(v -> openAvatarMenu());
         ScaleStateListAnimator.apply(avatarContainer);
 
         avatarDrawable = new AvatarDrawable();
         avatarView = new BackupImageView(context);
-        avatarView.setRoundRadius(dp(90));
-        avatarContainer.addView(avatarView, LayoutHelper.createFrame(90, 90, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 0, 15, 0, 0));
+        avatarView.setRoundRadius(dp(50));
+        avatarContainer.addView(avatarView, LayoutHelper.createFrame(100, 100));
+        cover.setAvatarAnchor(avatarView);
 
         avatarProgressView = new RadialProgressView(context) {
             private Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -453,7 +454,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         avatarProgressView.setSize(AndroidUtilities.dp(26));
         avatarProgressView.setProgressColor(0xffffffff);
         avatarProgressView.setNoProgress(false);
-        avatarContainer.addView(avatarProgressView, LayoutHelper.createFrame(90, 90, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 0, 15, 0, 0));
+        avatarContainer.addView(avatarProgressView, LayoutHelper.createFrame(100, 100));
         showAvatarProgress(false, false);
 
         cameraButton = new FrameLayout(context);
@@ -466,23 +467,65 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         cameraImageView.setImageResource(R.drawable.filled_premium_camera);
         cameraBackground.addView(cameraImageView, LayoutHelper.createFrame(22, 22, Gravity.CENTER));
         cameraButton.addView(cameraBackground, LayoutHelper.createFrame(30, 30));
-        avatarContainer.addView(cameraButton, LayoutHelper.createFrame(34, 34, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 32, 75, 0, 0));
-        ScaleStateListAnimator.apply(cameraButton);
+        cameraButton.setVisibility(View.GONE);
 
+        final LinearLayout nameLayout = new LinearLayout(context);
+        nameLayout.setOrientation(LinearLayout.HORIZONTAL);
+        nameLayout.setGravity(Gravity.CENTER);
         titleView = new TextView(context);
         titleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 22);
         titleView.setTypeface(AndroidUtilities.bold());
         titleView.setGravity(Gravity.CENTER);
         titleView.setSingleLine();
         titleView.setEllipsize(TextUtils.TruncateAt.END);
-        topView.addView(titleView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 16, 138.333f - 12, 16, 0));
+        nameLayout.addView(titleView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL));
+        statusView = new com.chickengram.ui.SettingsCover.StatusView(context);
+        statusView.setOnClickListener(v -> showEmojiStatusSelector());
+        nameLayout.addView(statusView, LayoutHelper.createLinear(32, 32, Gravity.CENTER_VERTICAL, 2, 0, 0, 0));
+        topView.addView(nameLayout, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, 36, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 24, 134, 24, 0));
 
         subtitleView = new TextView(context);
-        subtitleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
+        subtitleView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 15);
         subtitleView.setGravity(Gravity.CENTER);
         subtitleView.setSingleLine();
         subtitleView.setEllipsize(TextUtils.TruncateAt.END);
-        topView.addView(subtitleView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 0, 168 - 12, 0, 0));
+        topView.addView(subtitleView, LayoutHelper.createFrame(LayoutHelper.MATCH_PARENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_HORIZONTAL | Gravity.TOP, 24, 172, 24, 0));
+
+        qrButton = new ImageView(context);
+        qrButton.setScaleType(ImageView.ScaleType.CENTER);
+        qrButton.setImageResource(R.drawable.outline_header_qr_24);
+        qrButton.setContentDescription(getString(R.string.QrCode));
+        qrButton.setOnClickListener(v -> {
+            final Bundle args = new Bundle();
+            args.putLong("user_id", getUserConfig().getClientUserId());
+            presentFragment(new QrActivity(args));
+        });
+        ScaleStateListAnimator.apply(qrButton);
+        qrButton.setVisibility(hasMainTabs ? View.VISIBLE : View.GONE);
+        topView.addView(qrButton, LayoutHelper.createFrame(40, 40, Gravity.TOP | Gravity.LEFT, 16, 10, 0, 0));
+
+        final LinearLayout coverActions = new LinearLayout(context);
+        coverActions.setOrientation(LinearLayout.HORIZONTAL);
+        coverSearchButton = new ImageView(context);
+        coverSearchButton.setScaleType(ImageView.ScaleType.CENTER);
+        coverSearchButton.setImageResource(R.drawable.outline_header_search);
+        coverSearchButton.setContentDescription(getString(R.string.Search));
+        coverSearchButton.setOnClickListener(v -> {
+            actionBarMenu.setVisibility(View.VISIBLE);
+            searchItem.openSearch(true);
+        });
+        ScaleStateListAnimator.apply(coverSearchButton);
+        coverActions.addView(coverSearchButton, LayoutHelper.createLinear(40, 40));
+        editButton = new TextView(context);
+        editButton.setText("Изм.");
+        editButton.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
+        editButton.setTypeface(AndroidUtilities.bold());
+        editButton.setGravity(Gravity.CENTER);
+        editButton.setPadding(dp(16), 0, dp(16), 0);
+        editButton.setOnClickListener(v -> presentSettingFragment(new UserInfoActivity()));
+        ScaleStateListAnimator.apply(editButton);
+        coverActions.addView(editButton, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, 40, 8, 0, 0, 0));
+        topView.addView(coverActions, LayoutHelper.createFrame(LayoutHelper.WRAP_CONTENT, 40, Gravity.TOP | Gravity.RIGHT, 0, 10, 16, 0));
 
         versionView = new TextView(context);
         versionView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 14);
@@ -560,21 +603,133 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         avatarDrawable.setInfo(user);
         avatarView.setForUserOrChat(user, avatarDrawable);
         titleView.setText(UserObject.getUserName(user));
+        cover.update(user);
+        statusView.set(currentAccount, user, Color.WHITE);
         final StringBuilder sb = new StringBuilder();
-        String value = LocaleController.getString(R.string.NumberUnknown);
-        if (!NekoConfig.hidePhone.Bool()) {
-            if (user != null && user.phone != null && !user.phone.isEmpty()) {
-                value = PhoneFormat.getInstance().format("+" + user.phone);
-            }
+        if (!NekoConfig.hidePhone.Bool() && user != null && user.phone != null && !user.phone.isEmpty()) {
+            sb.append(PhoneFormat.getInstance().format("+" + user.phone));
         }
-        sb.append(value);
         final String username = UserObject.getPublicUsername(user);
         if (username != null) {
-            sb.append(" • @").append(username);
+            if (sb.length() > 0) {
+                sb.append(" • ");
+            }
+            sb.append("@").append(username);
         }
         subtitleView.setText(sb);
+        subtitleView.setVisibility(sb.length() > 0 ? View.VISIBLE : View.GONE);
+        updateCoverColors();
 
         versionView.setText(getVersionName());
+    }
+
+    private void updateCoverColors() {
+        if (cover == null) {
+            return;
+        }
+        final boolean light = cover.isLight();
+        final int glass = light ? 0x2E000000 : 0x2EFFFFFF;
+        final int pressed = light ? 0x4D000000 : 0x4DFFFFFF;
+        qrButton.setBackground(Theme.createSimpleSelectorRoundRectDrawable(dp(20), glass, pressed));
+        coverSearchButton.setBackground(Theme.createSimpleSelectorRoundRectDrawable(dp(20), glass, pressed));
+        editButton.setBackground(Theme.createSimpleSelectorRoundRectDrawable(dp(20), glass, pressed));
+        qrButton.setColorFilter(new PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN));
+        coverSearchButton.setColorFilter(new PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN));
+        editButton.setTextColor(Color.WHITE);
+        titleView.setTextColor(Color.WHITE);
+        subtitleView.setTextColor(0xD9FFFFFF);
+    }
+
+    private void openAvatarMenu() {
+        TLRPC.User user = MessagesController.getInstance(currentAccount).getUser(UserConfig.getInstance(currentAccount).getClientUserId());
+        if (user == null) {
+            user = UserConfig.getInstance(currentAccount).getCurrentUser();
+        }
+        if (user == null) {
+            return;
+        }
+        imageUpdater.openMenu(user.photo != null && user.photo.photo_big != null && !(user.photo instanceof TLRPC.TL_userProfilePhotoEmpty), () -> {
+            MessagesController.getInstance(currentAccount).deleteUserPhoto(null);
+        }, dialog -> {
+
+        }, 0);
+    }
+
+    private SelectAnimatedEmojiDialog.SelectAnimatedEmojiDialogWindow emojiStatusPopup;
+    private boolean emojiStatusScrolling;
+
+    private void showEmojiStatusSelector() {
+        final TLRPC.User user = getUserConfig().getCurrentUser();
+        if (emojiStatusPopup != null || user == null || cover == null) {
+            return;
+        }
+        if (!user.premium) {
+            showDialog(new PremiumFeatureBottomSheet(this, PremiumPreviewFragment.PREMIUM_FEATURE_EMOJI_STATUS, false));
+            return;
+        }
+        if (!cover.isAttachedToWindow() || cover.getParent() == null || ((View) cover.getParent()).getTop() < -dp(24)) {
+            if (!emojiStatusScrolling) {
+                emojiStatusScrolling = true;
+                listView.smoothScrollToPosition(0);
+                AndroidUtilities.runOnUIThread(() -> {
+                    emojiStatusScrolling = false;
+                    if (cover != null && cover.isAttachedToWindow()) {
+                        showEmojiStatusSelector();
+                    }
+                }, 400);
+            }
+            return;
+        }
+        final View anchor = statusView.getVisibility() == View.VISIBLE ? statusView : titleView;
+        final android.graphics.Rect rect = new android.graphics.Rect();
+        anchor.getDrawingRect(rect);
+        cover.offsetDescendantRectToMyCoords(anchor, rect);
+        final int xoff = (anchor == statusView ? rect.centerX() : rect.right) - dp(12);
+        final int yoff = -(cover.getHeight() - rect.centerY()) - dp(16);
+        final SelectAnimatedEmojiDialog.SelectAnimatedEmojiDialogWindow[] popup = new SelectAnimatedEmojiDialog.SelectAnimatedEmojiDialogWindow[1];
+        final SelectAnimatedEmojiDialog layout = new SelectAnimatedEmojiDialog(this, getContext(), true, xoff, SelectAnimatedEmojiDialog.TYPE_EMOJI_STATUS, getResourceProvider()) {
+            @Override
+            protected void onEmojiSelected(View emojiView, Long documentId, TLRPC.Document document, TL_stars.TL_starGiftUnique gift, Integer until) {
+                final TLRPC.EmojiStatus emojiStatus;
+                if (documentId == null) {
+                    emojiStatus = new TLRPC.TL_emojiStatusEmpty();
+                } else if (gift != null) {
+                    final TLRPC.TL_inputEmojiStatusCollectible status = new TLRPC.TL_inputEmojiStatusCollectible();
+                    status.collectible_id = gift.id;
+                    if (until != null) {
+                        status.flags |= 1;
+                        status.until = until;
+                    }
+                    emojiStatus = status;
+                } else {
+                    final TLRPC.TL_emojiStatus status = new TLRPC.TL_emojiStatus();
+                    status.document_id = documentId;
+                    if (until != null) {
+                        status.flags |= 1;
+                        status.until = until;
+                    }
+                    emojiStatus = status;
+                }
+                getMessagesController().updateEmojiStatus(emojiStatus, gift);
+                if (popup[0] != null) {
+                    popup[0].dismiss();
+                }
+            }
+        };
+        if (DialogObject.getEmojiStatusUntil(user.emoji_status) > 0) {
+            layout.setExpireDateHint(DialogObject.getEmojiStatusUntil(user.emoji_status));
+        }
+        layout.setSelected(UserObject.getEmojiStatusDocumentId(user));
+        layout.setSaveState(1);
+        popup[0] = emojiStatusPopup = new SelectAnimatedEmojiDialog.SelectAnimatedEmojiDialogWindow(layout, LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT) {
+            @Override
+            public void dismiss() {
+                super.dismiss();
+                emojiStatusPopup = null;
+            }
+        };
+        popup[0].showAsDropDown(cover, dp(16), yoff, Gravity.TOP);
+        popup[0].dimBehind();
     }
 
 
@@ -582,8 +737,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         actionBar.setTitleColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
         actionBar.setItemsColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText), false);
         contentView.setBackgroundColor(getThemedColor(Theme.key_windowBackgroundGray));
-        titleView.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteBlackText));
-        subtitleView.setTextColor(getThemedColor(Theme.key_windowBackgroundWhiteGrayText));
+        updateCoverColors();
         searchItem.updateColor();
 
         final int navigationBarColor = getThemedColor(Theme.key_windowBackgroundWhite);
@@ -630,12 +784,14 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         if (!animated) {
             actionBar.getTitlesContainer().setAlpha(visible ? 1.0f : 0.0f);
             actionBarBackground.setAlpha(visible ? 1.0f : 0.0f);
+            setActionBarMenuAlpha(visible ? 1.0f : 0.0f);
         } else {
             actionBarVisibleAnimator = ValueAnimator.ofFloat(actionBar.getTitlesContainer().getAlpha(), visible ? 1.0f : 0.0f);
             actionBarVisibleAnimator.addUpdateListener(a -> {
                 final float t = (float) a.getAnimatedValue();
                 actionBar.getTitlesContainer().setAlpha(t);
                 actionBarBackground.setAlpha(t);
+                setActionBarMenuAlpha(t);
             });
             actionBarVisibleAnimator.setInterpolator(CubicBezierInterpolator.EASE_OUT_QUINT);
             actionBarVisibleAnimator.setDuration(420);
@@ -643,16 +799,27 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         }
     }
 
+    private void setActionBarMenuAlpha(float alpha) {
+        if (actionBarMenu == null) {
+            return;
+        }
+        actionBarMenu.setAlpha(alpha);
+        final boolean searching = searchItem != null && searchItem.isSearchFieldVisible2();
+        actionBarMenu.setAlpha(searching ? 1.0f : alpha);
+        actionBarMenu.setVisibility(searching || alpha > 0.01f ? View.VISIBLE : View.INVISIBLE);
+    }
+
     private final ArrayList<Integer> accountNumbers = new ArrayList<>();
 
     private void fillItems(ArrayList<UItem> items, UniversalAdapter adapter) {
         if (searchItem.isSearchFieldVisible2()) {
-            items.add(UItem.asSpace(ActionBar.getCurrentActionBarHeight()));
+            items.add(UItem.asSpace((cover != null ? cover.getTopInset() : AndroidUtilities.statusBarHeight) + dp(12) + ActionBar.getCurrentActionBarHeight()));
             search.fillItems(items);
             return;
         }
 
-        items.add(UItem.asCustomShadow(topView, 200 - 12));
+        items.add(UItem.asCustomShadow(topView, LayoutHelper.WRAP_CONTENT));
+        items.add(UItem.asSpace(dp(16)));
 
         accountNumbers.clear();
         for (int a = 0; a < UserConfig.MAX_ACCOUNT_COUNT; a++) {
@@ -712,14 +879,28 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
             items.add(UItem.asShadow(null));
         }
 
-        if (accountNumbers.size() > 0) {
-            items.add(UItem.asHeader(getString(R.string.SettingsAccounts)));
+        final TLRPC.User self = getUserConfig().getCurrentUser();
+        if (!getMessagesController().premiumFeaturesBlocked() || self != null && self.premium) {
+            items.add(com.chickengram.ui.AccentRowCell.Factory.of(201, R.drawable.msg_smile_status, "Сменить эмодзи-статус"));
+        }
+        items.add(com.chickengram.ui.AccentRowCell.Factory.of(202, R.drawable.menu_profile_colors, "Изменить цвет профиля"));
+        final boolean hasPhoto = self != null && self.photo != null && self.photo.photo_big != null && !(self.photo instanceof TLRPC.TL_userProfilePhotoEmpty);
+        items.add(com.chickengram.ui.AccentRowCell.Factory.of(203, R.drawable.msg_addphoto, hasPhoto ? "Изменить фотографию" : "Выбрать фотографию"));
+        final boolean hasUsername = UserObject.getPublicUsername(self) != null;
+        items.add(com.chickengram.ui.AccentRowCell.Factory.of(204, hasUsername ? R.drawable.menu_username_change : R.drawable.menu_username_set, hasUsername ? "Изменить имя пользователя" : "Выбрать имя пользователя"));
+        items.add(UItem.asShadow(null));
+
+        final boolean canAddAccount = UserConfig.getActivatedAccountsCount() < UserConfig.MAX_ACCOUNT_COUNT;
+        if (accountNumbers.size() > 0 || canAddAccount) {
             final boolean accountsCollapsed = MainTabsActivity.isAccountListCollapsed();
             final int accountsCount = accountsCollapsed
                     ? Math.min(COLLAPSED_ACCOUNT_COUNT, accountNumbers.size())
                     : accountNumbers.size();
             for (int i = 0; i < accountsCount; ++i) {
                 items.add(AccountCell.Factory.of(i, accountNumbers.get(i)));
+            }
+            if (canAddAccount) {
+                items.add(com.chickengram.ui.AccentRowCell.Factory.of(205, R.drawable.msg_add, getString(R.string.AddAccount)));
             }
             if (accountNumbers.size() > COLLAPSED_ACCOUNT_COUNT) {
                 items.add(UItem.asShadowCollapseButton(
@@ -732,19 +913,25 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
             }
         }
 
+        items.add(SettingCell.Factory.of(206, IconBackgroundColors.RED.top, IconBackgroundColors.RED.bottom, R.drawable.settings_account, "Мой профиль"));
+        items.add(UItem.asShadow(null));
+
         items.add(SettingCell.Factory.of(101, 0xFFFF9A3C, 0xFFE8650C, R.drawable.msg_settings, "Настройки Чикенграма"));
         items.add(SettingCell.Factory.of(102, 0xFFA77BFF, 0xFF6B45E0, R.drawable.ghost, "Призрак и шпион"));
         items.add(UItem.asShadow(null));
 
-        items.add(SettingCell.Factory.of(1, IconBackgroundColors.BLUE.top, IconBackgroundColors.BLUE.bottom, R.drawable.settings_account, getString(R.string.SettingsAccount), getString(R.string.SettingsAccountInfo)));
-        items.add(SettingCell.Factory.of(2, IconBackgroundColors.ORANGE.top, IconBackgroundColors.ORANGE.bottom, R.drawable.settings_chat, getString(R.string.SettingsChat), getString(R.string.SettingsChatInfo)));
-        items.add(SettingCell.Factory.of(3, IconBackgroundColors.GREEN.top, IconBackgroundColors.GREEN.bottom, R.drawable.settings_privacy, getString(R.string.SettingsPrivacySecurity), getString(R.string.SettingsPrivacySecurityInfo)));
-        items.add(SettingCell.Factory.of(5, IconBackgroundColors.RED.top, IconBackgroundColors.RED.bottom, R.drawable.settings_sounds, getString(R.string.SettingsNotifications), getString(R.string.SettingsNotificationsInfo)));
-        items.add(SettingCell.Factory.of(6, IconBackgroundColors.BLUE_DEEP.top, IconBackgroundColors.BLUE_DEEP.bottom, R.drawable.settings_data, getString(R.string.SettingsData), getString(R.string.SettingsDataInfo)));
-        items.add(SettingCell.Factory.of(7, IconBackgroundColors.BLUE_ALT.top, IconBackgroundColors.BLUE_ALT.bottom, R.drawable.settings_folders, getString(R.string.SettingsFolders), getString(R.string.SettingsFoldersInfo)));
-        items.add(SettingCell.Factory.of(8, IconBackgroundColors.CYAN.top, IconBackgroundColors.CYAN.bottom, R.drawable.settings_devices, getString(R.string.SettingsDevices), getString(R.string.SettingsDevicesInfo)));
-        items.add(SettingCell.Factory.of(9, IconBackgroundColors.ORANGE_DEEP.top, IconBackgroundColors.ORANGE_DEEP.bottom, R.drawable.settings_power, getString(R.string.SettingsPowerSaving), getString(R.string.SettingsPowerSavingInfo)));
-        items.add(SettingCell.Factory.of(10, IconBackgroundColors.PURPLE.top, IconBackgroundColors.PURPLE.bottom, R.drawable.settings_language, getString(R.string.SettingsLanguage), LocaleController.getCurrentLanguageName()));
+        items.add(SettingCell.Factory.of(207, IconBackgroundColors.BLUE.top, IconBackgroundColors.BLUE.bottom, R.drawable.msg_saved, getString(R.string.SavedMessages)));
+        items.add(SettingCell.Factory.of(208, IconBackgroundColors.GREEN.top, IconBackgroundColors.GREEN.bottom, R.drawable.settings_calls, getString(R.string.Calls)));
+        items.add(SettingCell.Factory.of(8, IconBackgroundColors.ORANGE_DEEP.top, IconBackgroundColors.ORANGE_DEEP.bottom, R.drawable.settings_devices, getString(R.string.SettingsDevices)));
+        items.add(SettingCell.Factory.of(7, IconBackgroundColors.CYAN.top, IconBackgroundColors.CYAN.bottom, R.drawable.settings_folders, getString(R.string.SettingsFolders)));
+        items.add(UItem.asShadow(null));
+
+        items.add(SettingCell.Factory.of(5, IconBackgroundColors.RED.top, IconBackgroundColors.RED.bottom, R.drawable.settings_sounds, getString(R.string.SettingsNotifications)));
+        items.add(SettingCell.Factory.of(3, IconBackgroundColors.GRAY.top, IconBackgroundColors.GRAY.bottom, R.drawable.settings_privacy, getString(R.string.SettingsPrivacySecurity)));
+        items.add(SettingCell.Factory.of(6, IconBackgroundColors.GREEN.top, IconBackgroundColors.GREEN.bottom, R.drawable.settings_data, getString(R.string.SettingsData)));
+        items.add(SettingCell.Factory.of(2, IconBackgroundColors.BLUE_DEEP.top, IconBackgroundColors.BLUE_DEEP.bottom, R.drawable.settings_chat, getString(R.string.SettingsChat)));
+        items.add(SettingCell.Factory.of(9, IconBackgroundColors.ORANGE.top, IconBackgroundColors.ORANGE.bottom, R.drawable.settings_power, getString(R.string.SettingsPowerSaving)));
+        items.add(SettingCell.Factory.of(10, IconBackgroundColors.PURPLE.top, IconBackgroundColors.PURPLE.bottom, R.drawable.settings_language, getString(R.string.SettingsLanguage), null, LocaleController.getCurrentLanguageName()));
 
         items.add(UItem.asShadow(null));
 
@@ -784,7 +971,6 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         if (items.get(items.size() - 1).viewType != UniversalAdapter.VIEW_TYPE_SHADOW)
             items.add(UItem.asShadow(null));
 
-        items.add(UItem.asHeader(getString(R.string.SettingsHelp)));
         items.add(SettingCell.Factory.of(17, IconBackgroundColors.ORANGE.top, IconBackgroundColors.ORANGE.bottom, R.drawable.settings_ask, getString(R.string.AskAQuestion)));
         items.add(SettingCell.Factory.of(18, IconBackgroundColors.BLUE_LIGHT.top, IconBackgroundColors.BLUE_LIGHT.bottom, R.drawable.settings_faq, getString(R.string.TelegramFAQ)));
         items.add(SettingCell.Factory.of(23, IconBackgroundColors.PURPLE.top, IconBackgroundColors.PURPLE.bottom, R.drawable.settings_features, getString(R.string.TelegramFeatures)));
@@ -944,6 +1130,43 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
                 presentFragment(new com.chickengram.ui.settings.SpyPreferencesActivity());
                 break;
             }
+            case 201:
+                showEmojiStatusSelector();
+                break;
+            case 202:
+                presentSettingFragment(new PeerColorActivity(0).startOnProfile().setOnApplied(this));
+                break;
+            case 203:
+                openAvatarMenu();
+                break;
+            case 204:
+                presentSettingFragment(new ChangeUsernameActivity());
+                break;
+            case 205: {
+                final int availableAccount = UserConfig.requestAccountSlot();
+                if (availableAccount >= 0) {
+                    presentFragment(new LoginActivity(availableAccount));
+                } else {
+                    showDialog(new LimitReachedBottomSheet(this, getContext(), LimitReachedBottomSheet.TYPE_ACCOUNTS, currentAccount, null));
+                }
+                break;
+            }
+            case 206: {
+                final Bundle args = new Bundle();
+                args.putLong("user_id", getUserConfig().getClientUserId());
+                args.putBoolean("my_profile", true);
+                presentFragment(new ProfileActivity(args));
+                break;
+            }
+            case 207: {
+                final Bundle args = new Bundle();
+                args.putLong("user_id", getUserConfig().getClientUserId());
+                presentFragment(new ChatActivity(args));
+                break;
+            }
+            case 208:
+                presentSettingFragment(new CallLogActivity());
+                break;
         }
     }
 
@@ -999,7 +1222,10 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         final Insets systemInsets = AndroidUtilities.getDefaultWindowInsets(insets, false);
         navigationBarHeight = systemInsets.bottom;
         final int statusBarHeight = systemInsets.top;
-        listView.setPadding(0, statusBarHeight + dp(12), 0, navigationBarHeight + additionNavigationBarHeight);
+        listView.setPadding(0, 0, 0, navigationBarHeight + additionNavigationBarHeight);
+        if (cover != null) {
+            cover.setTopInset(statusBarHeight);
+        }
         return WindowInsetsCompat.CONSUMED;
     }
 
@@ -1179,6 +1405,7 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         private final TextView titleView;
         private final TextView subtitleView;
         private final TextView valueView;
+        private final ImageView arrowView;
         private final boolean mini;
 
         public SettingCell(Context context, Theme.ResourcesProvider resourcesProvider) {
@@ -1212,14 +1439,21 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
 
             valueView = new TextView(context);
             valueView.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 16);
+            arrowView = new ImageView(context);
+            arrowView.setScaleType(ImageView.ScaleType.CENTER);
+            arrowView.setImageResource(R.drawable.settings_arrow);
+            arrowView.setVisibility(mini ? View.GONE : View.VISIBLE);
             if (LocaleController.isRTL) {
-                addView(valueView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL, 20, 0, 0, 0));
+                arrowView.setScaleX(-1);
+                addView(arrowView, LayoutHelper.createLinear(20, 20, Gravity.CENTER_VERTICAL, 14, 0, 0, 0));
+                addView(valueView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL, mini ? 20 : 6, 0, 0, 0));
                 addView(textLayout, LayoutHelper.createLinear(0, LayoutHelper.WRAP_CONTENT, 1, Gravity.CENTER_VERTICAL | Gravity.FILL_HORIZONTAL, 20, 0, mini ? 12 : 18, 0));
                 addView(iconLayout, LayoutHelper.createLinear(28, 28, Gravity.CENTER_VERTICAL | Gravity.RIGHT, 0, 0, mini ? 9 : 18, 0));
             } else {
                 addView(iconLayout, LayoutHelper.createLinear(28, 28, Gravity.CENTER_VERTICAL | Gravity.LEFT, mini ? 9 : 18, 0, 0, 0));
                 addView(textLayout, LayoutHelper.createLinear(0, LayoutHelper.WRAP_CONTENT, 1, Gravity.CENTER_VERTICAL | Gravity.FILL_HORIZONTAL,  mini ? 12 : 18, 0, 20, 0));
-                addView(valueView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL, 0, 0, 20, 0));
+                addView(valueView, LayoutHelper.createLinear(LayoutHelper.WRAP_CONTENT, LayoutHelper.WRAP_CONTENT, Gravity.CENTER_VERTICAL, 0, 0, mini ? 20 : 6, 0));
+                addView(arrowView, LayoutHelper.createLinear(20, 20, Gravity.CENTER_VERTICAL, 0, 0, 14, 0));
             }
             updateColors();
         }
@@ -1228,9 +1462,13 @@ public class SettingsActivity extends BaseFragment implements NotificationCenter
         public void updateColors() {
             titleView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlackText, resourcesProvider));
             subtitleView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText, resourcesProvider));
-            valueView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteBlueText, resourcesProvider));
+            valueView.setTextColor(Theme.getColor(Theme.key_windowBackgroundWhiteGrayText, resourcesProvider));
+            arrowView.setColorFilter(new PorterDuffColorFilter(Theme.multAlpha(Theme.getColor(Theme.key_windowBackgroundWhiteGrayIcon, resourcesProvider), 0.7f), PorterDuff.Mode.SRC_IN));
             iconBackground.setDrawBorder(resourcesProvider != null ? resourcesProvider.isDark() : Theme.isCurrentThemeDark());
             Theme.applyThemeMonetColor(iconView, resourcesProvider, false);
+            if (!Theme.isCurrentThemeMonet()) {
+                iconView.setColorFilter(new PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_IN));
+            }
         }
 
         private boolean twoLines;
