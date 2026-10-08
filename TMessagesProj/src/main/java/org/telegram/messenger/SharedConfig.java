@@ -330,7 +330,7 @@ public class SharedConfig {
     public static boolean useSystemBoldFont;
     public static int fontSize = 12;
     public static boolean fontSizeIsDefault;
-    public static int bubbleRadius = 3;
+    public static int bubbleRadius = 15;
     public static int ivFontSize = 12;
     public static boolean proxyRotationEnabled;
     public static int proxyRotationTimeout;
@@ -662,7 +662,13 @@ public class SharedConfig {
             repeatMode = preferences.getInt("repeatMode", 0);
             fontSize = preferences.getInt("fons_size", AndroidUtilities.isTablet() && !AndroidUtilities.isFold() ? 14 : 12);
             fontSizeIsDefault = !preferences.contains("fons_size");
-            bubbleRadius = preferences.getInt("bubbleRadius", 3);
+            bubbleRadius = preferences.getInt("bubbleRadius", 15);
+            if (!preferences.getBoolean("chickengramBubbleRadius", false)) {
+                if (bubbleRadius == 3) {
+                    bubbleRadius = 15;
+                }
+                preferences.edit().putInt("bubbleRadius", bubbleRadius).putBoolean("chickengramBubbleRadius", true).apply();
+            }
             ivFontSize = preferences.getInt("iv_font_size", fontSize);
             allowBigEmoji = preferences.getBoolean("allowBigEmoji", true);
             useSystemBoldFont = preferences.getBoolean("useSystemBoldFont", false);
