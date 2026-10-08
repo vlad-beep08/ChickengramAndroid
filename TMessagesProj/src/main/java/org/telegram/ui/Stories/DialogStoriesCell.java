@@ -1688,7 +1688,14 @@ public class DialogStoriesCell extends FrameLayout implements NotificationCenter
                 backgroundPaint.setColor(getThemedColor(Theme.key_actionBarDefaultArchived));
             }
             if (progressToCollapsed != 0) {
-                canvas.drawCircle(cx, cy, radius + dpf2(1.5f), backgroundPaint);
+                if (com.chickengram.ChickengramConfig.avatarCorners() < com.chickengram.ChickengramConfig.MAX_AVATAR_CORNERS) {
+                    final float half = radius + dpf2(1.5f);
+                    final float corner = half * com.chickengram.ChickengramConfig.avatarCorners() / com.chickengram.ChickengramConfig.MAX_AVATAR_CORNERS;
+                    AndroidUtilities.rectTmp.set(cx - half, cy - half, cx + half, cy + half);
+                    canvas.drawRoundRect(AndroidUtilities.rectTmp, corner, corner, backgroundPaint);
+                } else {
+                    canvas.drawCircle(cx, cy, radius + dpf2(1.5f), backgroundPaint);
+                }
             }
 
             canvas.save();
