@@ -21,7 +21,7 @@ public class ChickengramPreferencesActivity extends BasePreferencesFragment {
         if (header == null) {
             header = new PreferencesHeaderView(getContext(), R.mipmap.ic_launcher_nagram_round, 0, 0, "Чикенграм", BuildVars.BUILD_VERSION_STRING);
         }
-        items.add(UItem.asFullyCustom(header));
+        items.add(UItem.asCustomShadow(header));
         items.add(UItem.asHeader("Категории"));
         items.add(button(R.drawable.msg_settings, "Основные", null, v -> presentFragment(new GeneralPreferencesActivity())));
         items.add(button(R.drawable.msg_palette, "Внешний вид", null, v -> presentFragment(new AppearancePreferencesActivity())));

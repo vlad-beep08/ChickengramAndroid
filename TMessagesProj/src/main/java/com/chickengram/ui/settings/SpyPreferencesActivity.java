@@ -21,7 +21,7 @@ public class SpyPreferencesActivity extends BasePreferencesFragment {
         if (header == null) {
             header = new PreferencesHeaderView(getContext(), 0, R.drawable.ghost, 0xFF6B45E0, "Призрак и шпион", "Чикенграм");
         }
-        items.add(UItem.asFullyCustom(header));
+        items.add(UItem.asCustomShadow(header));
         items.add(UItem.asHeader("Категории"));
         items.add(button(R.drawable.chickengram_ghost_outline, "Режим призрака", null, v -> presentFragment(new GhostPreferencesActivity())));
         items.add(button(R.drawable.msg_secret, "Шпион", null, v -> presentFragment(new SpyStoragePreferencesActivity())));
